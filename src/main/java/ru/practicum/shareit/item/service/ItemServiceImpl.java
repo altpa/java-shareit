@@ -22,7 +22,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto addItem(ItemDto itemDto, int ownerId) {
         log.info("+addItem: " + itemDto + ". ownerId = " + ownerId);
-        if (ownerId != 0 ) {
+        if (ownerId != 0) {
             itemDto.setOwner(ownerId);
             ItemDto item = mapper.itemToItemDto(itemDao.save(mapper.itemDtoToItem(itemDto)));
             log.info("-addItem: " + item);

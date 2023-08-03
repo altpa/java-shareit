@@ -2,11 +2,8 @@ package ru.practicum.shareit.item.dao;
 
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.dao.Dao;
-import ru.practicum.shareit.item.exception.ItemException;
 import ru.practicum.shareit.item.exception.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.exception.UserException;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +44,7 @@ public class ItemDao implements Dao<Item> {
         Optional<String> optionalName = Optional.ofNullable(item.getName());
         Optional<String> optionalDescription = Optional.ofNullable(item.getDescription());
 
-        if (itemForUpdate.getOwner() == ownerId ) {
+        if (itemForUpdate.getOwner() == ownerId) {
             optionalName.ifPresent(itemForUpdate::setName);
             optionalDescription.ifPresent(itemForUpdate::setDescription);
             items.put(itemId, itemForUpdate);
@@ -70,7 +67,7 @@ public class ItemDao implements Dao<Item> {
         for (Item item : items.values()) {
             boolean isInName =  item.getName().toLowerCase().contains(searchText.toLowerCase());
             boolean isInDescription = item.getDescription().toLowerCase().contains(searchText.toLowerCase());
-            if (!searchText.isEmpty() && (isInName ||isInDescription)) {
+            if (!searchText.isEmpty() && (isInName || isInDescription)) {
                 if (item.isAvailable()) {
                     foundItems.add(item);
                 }

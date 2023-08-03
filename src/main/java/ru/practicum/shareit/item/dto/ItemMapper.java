@@ -10,9 +10,11 @@ import ru.practicum.shareit.item.model.Item;
 public interface ItemMapper {
     ItemMapper INSTANCE = Mappers.getMapper(ItemMapper.class);
 
-    @Mapping(target = "available", source = "available", qualifiedByName="getBoolean")
+    @Mapping(target = "available", source = "available", qualifiedByName = "getBoolean")
     ItemDto itemToItemDto(Item item);
+
     Item itemDtoToItem(ItemDto itemDto);
+
     @Named("getBoolean")
     default boolean getBoolean(Boolean available) {
             return available;

@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(mapper::userToUserDto)
                 .collect(toList());
-        log.info("-getAllUsers: "+ users);
+        log.info("-getAllUsers: " + users);
         return users;
     }
 
