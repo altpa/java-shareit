@@ -62,7 +62,7 @@ public class ItemServiceImpl implements ItemService {
         Optional<Item> itemOptional = Optional.ofNullable(itemDao.get(itemId)).get();
         ItemDto item = mapper.itemToItemDto(itemOptional.orElseThrow(
                 () -> new ItemException("Вещи с itemId = " + itemId + " нет")));
-        log.info("+getItemById: " + item);
+        log.info("-getItemById: " + item);
         return item;
     }
 
@@ -73,7 +73,7 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(mapper::itemToItemDto)
                 .collect(toList());
-        log.info("+searchItems: " + items);
+        log.info("-searchItems: " + items);
         return items;
     }
 }
