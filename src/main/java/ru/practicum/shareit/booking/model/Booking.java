@@ -7,7 +7,7 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 
 public class Booking {
-    private int id;
+    private long id;
     private LocalDateTime start;
     private LocalDateTime end;
     private Item item;
