@@ -27,11 +27,7 @@ public class ItemDao implements Dao<Item> {
 
     public List<Item> getAll(long ownerId) {
         List<Item> itemsOfOwner = new ArrayList<>();
-        for (Item item : items.values()) {
-            if (item.getOwner() == ownerId) {
-                itemsOfOwner.add(item);
-            }
-        }
+        itemsOfOwner = usersItems.get(ownerId).stream().map(items::get).collect(Collectors.toList());
         return itemsOfOwner;
     }
 

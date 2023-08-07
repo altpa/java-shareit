@@ -1,6 +1,8 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ObjectsDbException;
 import ru.practicum.shareit.user.dao.UserDao;
@@ -14,8 +16,11 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserDao userDao = new UserDao();
+
+    @Autowired
+    private final UserDao userDao;
     private static final UserMapper mapper = UserMapper.INSTANCE;
 
     @Override

@@ -8,14 +8,16 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public class UserDao implements Dao<User> {
     private final Map<Long, User> users = new HashMap<>();
-    private final Map<Long, String> emails = new HashMap<>();
+    private final Set<String> emails = new HashSet<>();
     private long id = 0;
 
     @Override
@@ -34,7 +36,7 @@ public class UserDao implements Dao<User> {
         id++;
         user.setId(id);
         users.put(id, user);
-        emails.put(id, user.getEmail());
+        emails.add(user.getEmail());
         return user;
     }
 
@@ -48,8 +50,8 @@ public class UserDao implements Dao<User> {
 
         optionalName.ifPresent(userForUpdate::setName);
         if (optionalEmail.isPresent()) {
-            emails.remove(userId);
-            emails.put(userForUpdate.getId(), optionalEmail.get());
+            emails.remove(userForUpdate.getEmail());
+            emails.add(optionalEmail.get());
             userForUpdate.setEmail(optionalEmail.get());
         }
         return userForUpdate;
@@ -59,23 +61,25 @@ public class UserDao implements Dao<User> {
     public User delete(long userId) {
         User userForDelete = ifExist(userId);
         users.remove(userId);
-        emails.remove(userId);
+        emails.remove(userForDelete.getEmail());
         return userForDelete;
     }
 
     @Override
     public User ifExist(long userId) {
-        return get(userId).orElseThrow(() -> {
-            throw new ObjectNotFoundException("Нет юзера с userId = " + userId);
-        });
+        return get(userId).orElseThrow(() -> new ObjectNotFoundException("Нет юзера с userId = " + userId));
     }
 
     private void checkEmail(String newEmail, long userId) {
-        Optional<String> oldEmail = Optional.ofNullable(emails.get(userId));
-        if (emails.containsValue(newEmail) &&
-                !(oldEmail.isPresent() && oldEmail.get().equals(newEmail))) {
-            throw new ObjectsDbException("Не могу создать юзера: userId = " + userId +
-                    ". Пользователь с email = " + newEmail + " уже есть");
+        boolean updateSameEmail = false;
+        if (users.containsKey(userId)) {
+            Optional<String> oldEmail = Optional.ofNullable(users.get(userId).getEmail());
+            updateSameEmail = oldEmail.isPresent() && oldEmail.get().equals(newEmail);
+        }
+
+        if (emails.contains(newEmail) ^ updateSameEmail) {
+                throw new ObjectsDbException("Не могу создать юзера: userId = " + userId +
+                        ". Пользователь с email = " + newEmail + " уже есть");
         }
     }
 }

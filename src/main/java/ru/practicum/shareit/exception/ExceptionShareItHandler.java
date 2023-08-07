@@ -5,10 +5,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
+
 @RestControllerAdvice
 public class ExceptionShareItHandler {
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseBody handleItemException(final Throwable e) {
         e.printStackTrace();
         return new ResponseBody(
@@ -35,8 +37,8 @@ public class ExceptionShareItHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseBody handleObjectsDbException(final ObjectsDbException  e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseBody handleValidationException(final ConstraintViolationException e) {
         e.printStackTrace();
         return new ResponseBody(
                 e.getMessage()
