@@ -9,10 +9,11 @@ import java.time.LocalDateTime;
 
 public class BookingDto {
     private long id;
-    @JsonFormat(pattern = "dd-MM-yyyy@HH:mm:ss")
+    private static final String DATE_PATTERN = "dd-MM-yyyy@HH:mm:ss";
+    @JsonFormat(pattern = DATE_PATTERN)
     @PastOrPresent
     private LocalDateTime start;
-    @JsonFormat(pattern = "dd-MM-yyyy@HH:mm:ss")
+    @JsonFormat(pattern = DATE_PATTERN)
     @Future
     private LocalDateTime end;
     private long item;
