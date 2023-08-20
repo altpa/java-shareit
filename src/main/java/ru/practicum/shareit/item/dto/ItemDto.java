@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.validation.Marker;
 
 import javax.validation.constraints.NotBlank;
@@ -15,6 +16,5 @@ public class ItemDto {
     private String description;
     @NotNull(groups = Marker.OnCreate.class)
     private Boolean available;
-    private long owner;
-    private long request;
+    private User owner;
 }

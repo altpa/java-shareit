@@ -35,9 +35,7 @@ public class ItemController {
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(HEADER) long ownerId) {
         log.info("+ItemController - addItem: " + itemDto + ". ownerId = " + ownerId);
 
-            userService.checkOwner(ownerId);
-
-        ItemDto item = itemService.addItem(itemDto, ownerId);
+        ItemDto item = itemService.addItem(itemDto, ownerId, userService.checkOwner(ownerId));
         log.info("-ItemController - addItem: " + item);
         return item;
     }
