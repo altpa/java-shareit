@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.model;
+package ru.practicum.shareit.comment.model;
 
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
@@ -13,18 +13,12 @@ import javax.persistence.Table;
 
 @Data
 @Entity
-@Table(name = "users")
+@Table(name = "comments")
 @DynamicUpdate
 @DynamicInsert
-public class User {
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private long id;
-
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "email")
-    private String email;
 }

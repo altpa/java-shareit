@@ -22,6 +22,7 @@ public interface UserRepository extends Repository<User, Long> {
     long count();
 
     void delete(User user);
+
     User deleteById(Long id);
 
     Boolean existsById(Long primaryKey);

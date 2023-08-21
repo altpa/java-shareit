@@ -5,13 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.exception.ObjectsDbException;
-import ru.practicum.shareit.user.dao.UserDao;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -22,7 +19,6 @@ import static java.util.stream.Collectors.toList;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserDao userDao;
     private final UserRepository userRepository;
     private static final UserMapper mapper = UserMapper.INSTANCE;
 

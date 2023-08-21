@@ -11,4 +11,6 @@ public interface ItemMapper {
     ItemDto itemToItemDto(Item item);
 
     Item itemDtoToItem(ItemDto itemDto);
+
+    ItemDtoById itemToItemDtoById(Item item);
 }
