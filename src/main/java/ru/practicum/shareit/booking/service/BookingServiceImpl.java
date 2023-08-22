@@ -16,7 +16,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -28,6 +28,7 @@ public class BookingServiceImpl implements BookingService {
     private static final BookingStatus APPROVED = BookingStatus.APPROVED;
     private static final BookingStatus REJECTED = BookingStatus.REJECTED;
     private static final BookingStatus WAITING = BookingStatus.WAITING;
+    private static final BookingStatus CURRENT = BookingStatus.CURRENT;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
@@ -37,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto addBooking(BookingDto bookingDto, long userId) {
         log.info("+BookingServiceImpl - addBooking: " + bookingDto + ", userId = " + userId);
-        if (bookingDto.getStart().after(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
+        if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
             throw new BadRequestException("start = " + bookingDto.getStart() + " after or equals end = "
                     + bookingDto.getEnd());
         }
@@ -60,14 +61,13 @@ public class BookingServiceImpl implements BookingService {
             .orElseThrow(() -> new ObjectNotFoundException("userId = " + userId + " not found")));
 
         bookingDto.setStatus(WAITING);
-
         BookingDto answer = mapper.bookingToBookingDto(bookingRepository.save(mapper.bookingDtoToBooking(bookingDto)));
         log.info("-BookingServiceImpl - addBooking: " + answer);
         return answer;
     }
 
     @Override
-    public BookingDto changeStatus(Long bookingId, Boolean approved, long userId) {
+    public BookingDto changeStatus(Long bookingId, boolean approved, long userId) {
         log.info("+BookingServiceImpl - changeStatus: bookingId = " + bookingId + ", approved = " + approved + ", userId = " + userId);
         Booking booking = bookingRepository.findByIdOrderByIdDesc(bookingId)
                 .orElseThrow(() -> new ObjectNotFoundException("bookingId = " + bookingId + " not found"));
@@ -116,8 +116,10 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getByUserId(long userId, String state, boolean isBooker) {
-        log.info("+BookingServiceImpl - getByUserId: userId = " + userId + ", state = " + state + ", isBooker = " + isBooker);
-        Streamable<Booking> booking = Streamable.empty();
+        log.info("+BookingServiceImpl - getByUserId: userId = " + userId + ", state = " + state + ", isBooker = "
+                + isBooker);
+
+        Streamable<Booking> booking;
         checkUser(userId);
         switch (state) {
             case "ALL":
@@ -128,24 +130,27 @@ public class BookingServiceImpl implements BookingService {
                 }
                 break;
             case "CURRENT":
+                LocalDateTime now = LocalDateTime.now();
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndEndAfterOrderByIdDesc(userId, Instant.now());
+                    booking = bookingRepository
+                            .findByBookerIdAndStartBeforeAndEndAfterOrderByIdAsc(userId, now, now);
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndEndAfterOrderByIdDesc(userId, Instant.now());
+                    booking = bookingRepository
+                            .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByIdAsc(userId, now, now);
                 }
                 break;
             case "PAST":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndEndBeforeOrderByIdDesc(userId, Instant.now());
+                    booking = bookingRepository.findByBookerIdAndEndBeforeOrderByIdDesc(userId, LocalDateTime.now());
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByIdDesc(userId, Instant.now());
+                    booking = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByIdDesc(userId, LocalDateTime.now());
                 }
                 break;
             case "FUTURE":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndStartAfterOrderByIdDesc(userId, Instant.now());
+                    booking = bookingRepository.findByBookerIdAndStartAfterOrderByIdDesc(userId, LocalDateTime.now());
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndStartAfterOrderByIdDesc(userId, Instant.now());
+                    booking = bookingRepository.findByItemOwnerIdAndStartAfterOrderByIdDesc(userId, LocalDateTime.now());
                 }
                 break;
             case "WAITING":
