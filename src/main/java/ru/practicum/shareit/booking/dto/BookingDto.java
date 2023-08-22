@@ -9,8 +9,7 @@ import ru.practicum.shareit.validation.Marker;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
-
+import java.time.LocalDateTime;
 
 @Data
 public class BookingDto {
@@ -21,12 +20,12 @@ public class BookingDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
     @FutureOrPresent
     @NotNull
-    private Date start;
+    private LocalDateTime start;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
     @FutureOrPresent
     @NotNull
-    private Date end;
+    private LocalDateTime end;
 
     private Item item;
 

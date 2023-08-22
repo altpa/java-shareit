@@ -17,7 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -31,10 +31,10 @@ public class Booking {
     private long id;
 
     @Column(name = "start_time")
-    private Instant start;
+    private LocalDateTime start;
 
     @Column(name = "end_time")
-    private Instant end;
+    private LocalDateTime end;
 
     @OneToOne
     @JoinColumn(name = "item")

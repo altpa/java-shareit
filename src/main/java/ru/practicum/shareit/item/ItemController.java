@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoById;
+import ru.practicum.shareit.item.dto.ItemDtoWithBookingAndComments;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.Marker;
@@ -43,9 +43,9 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoById> getAllItems(@RequestHeader(HEADER) long ownerId) {
+    public List<ItemDtoWithBookingAndComments> getAllItems(@RequestHeader(HEADER) long ownerId) {
         log.info("+ItemController - getAllItems: ownerId = " + ownerId);
-        List<ItemDtoById> allItems = itemService.getAllItemsByOwnerId(ownerId);
+        List<ItemDtoWithBookingAndComments> allItems = itemService.getAllItemsByOwnerId(ownerId);
         log.info("-ItemController - getAllItems: " + allItems);
         return allItems;
     }
@@ -63,9 +63,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoById getItemById(@PathVariable long itemId, @RequestHeader(HEADER) long ownerId) {
+    public ItemDtoWithBookingAndComments getItemById(@PathVariable long itemId, @RequestHeader(HEADER) long ownerId) {
         log.info("+ItemController - getItemById: itemId = " + itemId);
-        ItemDtoById item = itemService.getItemById(itemId, ownerId);
+        ItemDtoWithBookingAndComments item = itemService.getItemById(itemId, ownerId);
         log.info("-ItemController - getItemById: " + item);
         return item;
     }
