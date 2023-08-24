@@ -12,15 +12,20 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.comment.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoWithBookingAndComments;
+import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.Marker;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Validated
@@ -30,60 +35,83 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
     private final UserService userService;
+    private final BookingService bookingService;
     private static final String HEADER = "X-Sharer-User-Id";
+    private static final ItemMapper itemMapper = ItemMapper.INSTANCE;
+    private static final CommentMapper commentMapper = CommentMapper.INSTANCE;
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(HEADER) long ownerId) {
-        log.info("+ItemController - addItem: " + itemDto + ". ownerId = " + ownerId);
+        log.debug("+ItemController - addItem: " + itemDto + ". ownerId = " + ownerId);
 
-        ItemDto item = itemService.addItem(itemDto, ownerId, userService.checkOwner(ownerId));
-        log.info("-ItemController - addItem: " + item);
+        ItemDto item = itemMapper.itemToItemDto(itemService.addItem(itemDto, ownerId, userService.checkOwner(ownerId)));
+        log.debug("-ItemController - addItem: " + item);
         return item;
     }
 
     @GetMapping
-    public List<ItemDtoWithBookingAndComments> getAllItems(@RequestHeader(HEADER) long ownerId) {
-        log.info("+ItemController - getAllItems: ownerId = " + ownerId);
-        List<ItemDtoWithBookingAndComments> allItems = itemService.getAllItemsByOwnerId(ownerId);
-        log.info("-ItemController - getAllItems: " + allItems);
-        return allItems;
+    public List<ItemDto> getAllItemsByOwnerId(@RequestHeader(HEADER) long ownerId) {
+        log.debug("+ItemController - getAllItems: ownerId = " + ownerId);
+        List<Item> allItemsByOwnerId = itemService.getAllItemsByOwnerId(ownerId);
+        List<ItemDto> itemsDto = new ArrayList<>();
+        for (Item item : allItemsByOwnerId) {
+            ItemDto itemDto = itemMapper.itemToItemDto(item);
+            itemDto.setComments(itemService.getCommentsToItem(itemDto));
+            itemDto.setLastBooking(bookingService.getLastBooking(itemDto, ownerId));
+            itemDto.setNextBooking(bookingService.getNextBooking(itemDto, ownerId));
+            itemsDto.add(itemDto);
+        }
+        log.debug("-ItemController - getAllItems: " + allItemsByOwnerId);
+        return itemsDto;
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestBody ItemDto itemDto,
                                     @RequestHeader(HEADER) long ownerId, @PathVariable long itemId) {
-        log.info("+ItemController - updateItem: " + itemDto + ". ownerId = " + ownerId + ". itemId = " + itemId);
+        log.debug("+ItemController - updateItem: " + itemDto + ". ownerId = " + ownerId + ". itemId = " + itemId);
 
             userService.checkOwner(ownerId);
 
-        ItemDto item = itemService.updateItem(itemDto, ownerId, itemId);
-        log.info("-ItemController - updateItem: " + item);
+        ItemDto item = itemMapper.itemToItemDto(itemService.updateItem(itemDto, ownerId, itemId));
+        log.debug("-ItemController - updateItem: " + item);
         return item;
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoWithBookingAndComments getItemById(@PathVariable long itemId, @RequestHeader(HEADER) long ownerId) {
-        log.info("+ItemController - getItemById: itemId = " + itemId);
-        ItemDtoWithBookingAndComments item = itemService.getItemById(itemId, ownerId);
-        log.info("-ItemController - getItemById: " + item);
-        return item;
+    public ItemDto getItemById(@PathVariable long itemId, @RequestHeader(HEADER) long ownerId) {
+        log.debug("+ItemController - getItemById: itemId = " + itemId);
+        Item item = itemService.getItemById(itemId, ownerId);
+
+        ItemDto itemDto =
+                itemMapper.itemToItemDto(item);
+
+        itemDto.setComments(itemService.getCommentsToItem(itemDto));
+        itemDto.setLastBooking(bookingService.getLastBooking(itemDto, ownerId));
+        itemDto.setNextBooking(bookingService.getNextBooking(itemDto, ownerId));
+        log.debug("-ItemController - getItemById: " + item);
+        return itemDto;
     }
 
     @GetMapping("/search")
     public List<ItemDto> searchItems(@RequestParam("text") String searchText) {
-        log.info("+ItemController - searchItems: searchText = " + searchText);
-        List<ItemDto> items = itemService.searchItems(searchText);
-        log.info("-ItemController - searchItems: " + items);
+        log.debug("+ItemController - searchItems: searchText = " + searchText);
+
+        List<ItemDto> items = itemService.searchItems(searchText)
+                .stream()
+                .map(itemMapper::itemToItemDto)
+                .collect(Collectors.toList());
+
+        log.debug("-ItemController - searchItems: " + items);
         return items;
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@Valid @RequestBody CommentDto comment, @PathVariable long itemId,
-                                 @RequestHeader(HEADER) long ownerId) {
-        log.info("+ItemController - addComment: comment = " + comment + ", ownerId = " + ownerId);
-        CommentDto answer = itemService.addComment(comment, ownerId, itemId);
-        log.info("-ItemController - addComment: " + answer);
+                              @RequestHeader(HEADER) long ownerId) {
+        log.debug("+ItemController - addComment: comment = " + comment + ", ownerId = " + ownerId);
+        CommentDto answer = commentMapper.commentToCommentDto(itemService.addComment(comment, ownerId, itemId));
+        log.debug("-ItemController - addComment: " + answer);
         return answer;
     }
 }

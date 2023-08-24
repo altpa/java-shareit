@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -25,52 +28,50 @@ public class BookingController {
     private static final String HEADER = "X-Sharer-User-Id";
 
     private final BookingService bookingService;
+    private static final BookingMapper mapper = BookingMapper.INSTANCE;
 
     @PostMapping
     public BookingDto addBooking(@Valid @RequestBody BookingDto bookingDto, @RequestHeader(HEADER) long userId) {
-        log.info("+BookingController - addBooking: bookingDto = " + bookingDto + ", userId = " + userId);
-        BookingDto answer =  bookingService.addBooking(bookingDto, userId);
-        log.info("-BookingController - addBooking: answer = " + answer);
-        return answer;
+        log.debug("+BookingController - addBooking: bookingDto = " + bookingDto + ", userId = " + userId);
+        Booking answer =  bookingService.addBooking(bookingDto, userId);
+        log.debug("-BookingController - addBooking: answer = " + answer);
+        return mapper.bookingToBookingDto(answer);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDto changeStatus(@PathVariable long bookingId, @RequestParam Boolean approved,
                                    @RequestHeader(HEADER) long userId) {
-        log.info("+BookingController - changeStatus: bookingId = " + bookingId + ", approved = "
+        log.debug("+BookingController - changeStatus: bookingId = " + bookingId + ", approved = "
                 + approved + ", userId = " + userId);
-        BookingDto answer = bookingService.changeStatus(bookingId, approved, userId);
-        log.info("+BookingController - changeStatus: answer = " + answer);
-        return answer;
+        Booking answer = bookingService.changeStatus(bookingId, approved, userId);
+        log.debug("+BookingController - changeStatus: answer = " + answer);
+        return mapper.bookingToBookingDto(answer);
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto getById(@PathVariable long bookingId, @RequestHeader(HEADER) long userId) {
-        log.info("+BookingController - getById: bookingId = " + bookingId +  ", userId = " + userId);
-        BookingDto answer = bookingService.getById(bookingId, userId);
-        log.info("+BookingController - getById: answer = " + answer);
-        return answer;
+        log.debug("+BookingController - getById: bookingId = " + bookingId +  ", userId = " + userId);
+        Booking answer = bookingService.getById(bookingId, userId);
+        log.debug("+BookingController - getById: answer = " + answer);
+        return mapper.bookingToBookingDto(answer);
     }
 
     @GetMapping
-    public List<BookingDto> getByUserId(@RequestHeader(HEADER) long userId,
+    public List<BookingDto> getByUserIdAndStateByBooker(@RequestHeader(HEADER) long userId,
                                         @RequestParam(defaultValue = "ALL") String state) {
-        boolean isBooker = true;
-        log.info("+BookingController - getByUserId: userId = " + userId +  ", state = "
-                + state + ", isBooker = " + isBooker);
-        List<BookingDto> answer =  bookingService.getByUserId(userId, state, isBooker);
-        log.info("+BookingController - getByUserId: answer = " + answer);
-        return answer;
+        log.debug("+BookingController - getByUserIdAndState: userId = " + userId +  ", state = " + state);
+        List<Booking> answer =  bookingService.getByUserIdAndStateByBooker(userId, state);
+
+        log.debug("+BookingController - getByUserIdAndState: answer = " + answer);
+        return answer.stream().map(mapper::bookingToBookingDto).collect(Collectors.toList());
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getByOwnerId(@RequestHeader(HEADER) long userId,
+    public List<BookingDto> getByUserIdAndStateByOwner(@RequestHeader(HEADER) long userId,
                                          @RequestParam(defaultValue = "ALL") String state) {
-        boolean isBooker = false;
-        log.info("+BookingController - getByOwnerId: userId = " + userId +  ", state = "
-                + state + ", isBooker = " + isBooker);
-        List<BookingDto> answer = bookingService.getByUserId(userId, state, isBooker);
-        log.info("+BookingController - getByOwnerId: answer = " + answer);
-        return answer;
+        log.debug("+BookingController - getByOwnerId: userId = " + userId +  ", state = " + state);
+        List<Booking> answer = bookingService.getByUserIdAndStateByOwner(userId, state);
+        log.debug("+BookingController - getByOwnerId: answer = " + answer);
+        return answer.stream().map(mapper::bookingToBookingDto).collect(Collectors.toList());
     }
 }

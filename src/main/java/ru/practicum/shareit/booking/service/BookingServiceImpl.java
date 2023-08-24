@@ -4,31 +4,32 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.LastOrNextBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ObjectNotFoundException;
 import ru.practicum.shareit.exception.ObjectsDbException;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static ru.practicum.shareit.booking.BookingStatus.APPROVED;
+import static ru.practicum.shareit.booking.BookingStatus.REJECTED;
+import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 
 @Data
 @Slf4j
 @Service
 public class BookingServiceImpl implements BookingService {
-    private static final BookingStatus APPROVED = BookingStatus.APPROVED;
-    private static final BookingStatus REJECTED = BookingStatus.REJECTED;
-    private static final BookingStatus WAITING = BookingStatus.WAITING;
-    private static final BookingStatus CURRENT = BookingStatus.CURRENT;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
@@ -36,8 +37,8 @@ public class BookingServiceImpl implements BookingService {
     private static final BookingMapper mapper = BookingMapper.INSTANCE;
 
     @Override
-    public BookingDto addBooking(BookingDto bookingDto, long userId) {
-        log.info("+BookingServiceImpl - addBooking: " + bookingDto + ", userId = " + userId);
+    public Booking addBooking(BookingDto bookingDto, long userId) {
+        log.debug("+BookingServiceImpl - addBooking: " + bookingDto + ", userId = " + userId);
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
             throw new BadRequestException("start = " + bookingDto.getStart() + " after or equals end = "
                     + bookingDto.getEnd());
@@ -61,14 +62,14 @@ public class BookingServiceImpl implements BookingService {
             .orElseThrow(() -> new ObjectNotFoundException("userId = " + userId + " not found")));
 
         bookingDto.setStatus(WAITING);
-        BookingDto answer = mapper.bookingToBookingDto(bookingRepository.save(mapper.bookingDtoToBooking(bookingDto)));
-        log.info("-BookingServiceImpl - addBooking: " + answer);
+        Booking answer = bookingRepository.save(mapper.bookingDtoToBooking(bookingDto));
+        log.debug("-BookingServiceImpl - addBooking: " + answer);
         return answer;
     }
 
     @Override
-    public BookingDto changeStatus(Long bookingId, boolean approved, long userId) {
-        log.info("+BookingServiceImpl - changeStatus: bookingId = " + bookingId + ", approved = " + approved + ", userId = " + userId);
+    public Booking changeStatus(Long bookingId, boolean approved, long userId) {
+        log.debug("+BookingServiceImpl - changeStatus: bookingId = " + bookingId + ", approved = " + approved + ", userId = " + userId);
         Booking booking = bookingRepository.findByIdOrderByIdDesc(bookingId)
                 .orElseThrow(() -> new ObjectNotFoundException("bookingId = " + bookingId + " not found"));
 
@@ -88,14 +89,14 @@ public class BookingServiceImpl implements BookingService {
                     + " not equals userId = " + userId);
         }
 
-        BookingDto answer = mapper.bookingToBookingDto(bookingRepository.save(booking));
-        log.info("-BookingServiceImpl - changeStatus: " + answer);
+        Booking answer = bookingRepository.save(booking);
+        log.debug("-BookingServiceImpl - changeStatus: " + answer);
         return answer;
     }
 
     @Override
-    public BookingDto getById(long bookingId, long userId) {
-        log.info("+BookingServiceImpl - getById: bookingId = " + bookingId + ", userId = " + userId);
+    public Booking getById(long bookingId, long userId) {
+        log.debug("+BookingServiceImpl - getById: bookingId = " + bookingId + ", userId = " + userId);
         checkUser(userId);
         Booking booking = bookingRepository.findByIdOrderByIdDesc(bookingId)
                 .orElseThrow(() -> new ObjectNotFoundException("bookingId = " + bookingId + " not found"));
@@ -105,9 +106,8 @@ public class BookingServiceImpl implements BookingService {
         long bookerId = booking.getBooker().getId();
 
         if (ownerId == userId || bookerId == userId) {
-            BookingDto answer = mapper.bookingToBookingDto(booking);
-            log.info("-BookingServiceImpl - getById: " + answer);
-            return answer;
+            log.debug("-BookingServiceImpl - getById: " + booking);
+            return booking;
         } else {
             throw new ObjectNotFoundException("userId = " + userId + ", ownerId = " + ownerId + ", bookerId = "
                     + bookerId);
@@ -115,10 +115,66 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getByUserId(long userId, String state, boolean isBooker) {
-        log.info("+BookingServiceImpl - getByUserId: userId = " + userId + ", state = " + state + ", isBooker = "
-                + isBooker);
+    public List<Booking> getByUserIdAndStateByBooker(long userId, String state) {
+        log.debug("+BookingServiceImpl - getByUserIdAndStateByBooker: userId = " + userId + ", state = " + state);
+        boolean isBooker = true;
+        List<Booking> answer = getByUserIdAndState(userId, state, isBooker);
+        log.debug("-BookingServiceImpl - getByUserIdAndStateByBooker: " + answer);
+        return answer;
+    }
 
+    @Override
+    public List<Booking> getByUserIdAndStateByOwner(long userId, String state) {
+        log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state);
+        boolean isBooker = false;
+        List<Booking> answer = getByUserIdAndState(userId, state, isBooker);
+        log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state);
+        return answer;
+    }
+
+    @Override
+    public LastOrNextBooking getLastBooking(ItemDto item, long ownerId) {
+        boolean isLastBooking = true;
+        return getBookingToItem(item, ownerId, isLastBooking);
+    }
+
+    @Override
+    public LastOrNextBooking getNextBooking(ItemDto item, long ownerId) {
+        boolean isLastBooking = false;
+        return getBookingToItem(item, ownerId, isLastBooking);
+    }
+
+    private LastOrNextBooking getBookingToItem(ItemDto item, long ownerId, boolean isLastBooking) {
+        log.debug("+ItemServiceImpl - getBookingToItem: ItemDtoWithBooking = " + item + ", ownerId = " + ownerId);
+        List<LastOrNextBooking> bookings = bookingRepository
+                .findByItemIdOrderByStartAsc(item.getId())
+                .stream()
+                .filter(b -> b.getStatus().equals(APPROVED))
+                .collect(Collectors.toList());
+
+        log.debug("ItemServiceImpl - getBookingToItem: bookings = " + bookings + ", LocalDateTime.now() = " + LocalDateTime.now());
+        LastOrNextBooking answer = null;
+        if (item.getOwner().getId() == ownerId && !bookings.isEmpty()) {
+            LocalDateTime now = LocalDateTime.now();
+
+            int lastBookingIndex = 0;
+            for (int i = 0; i < bookings.size(); i++) {
+                if (bookings.get(i).getStart().isBefore(now)) {
+                    lastBookingIndex = i;
+                }
+            }
+            int nextBookingIndex = lastBookingIndex + 1;
+            if (isLastBooking) {
+                answer =  bookings.get(lastBookingIndex);
+            } else if (bookings.size() > nextBookingIndex) {
+                answer =  bookings.get(nextBookingIndex);
+            }
+        }
+        log.debug("-ItemServiceImpl - getBookingToItem: ItemDtoWithBooking = " + item);
+        return answer;
+    }
+
+    private List<Booking> getByUserIdAndState(long userId, String state, boolean isBooker) {
         Streamable<Booking> booking;
         checkUser(userId);
         switch (state) {
@@ -171,15 +227,12 @@ public class BookingServiceImpl implements BookingService {
                 throw new ObjectsDbException("Unknown state: " + state);
         }
 
-        List<BookingDto> answer = booking.stream()
-                .map(mapper::bookingToBookingDto)
+        return booking.stream()
                 .collect(toList());
-        log.info("-BookingServiceImpl - getByUserId: " + answer);
-        return answer;
     }
 
     private void checkUser(long userId) {
-        if (!userRepository.existsById(userId)) {
+        if (Boolean.FALSE.equals(userRepository.existsById(userId))) {
             throw new ObjectNotFoundException("userId = " + userId + " not found");
         }
     }

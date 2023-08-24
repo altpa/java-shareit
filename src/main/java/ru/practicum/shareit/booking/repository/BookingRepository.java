@@ -6,6 +6,7 @@ import org.springframework.data.util.Streamable;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.LastOrNextBooking;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,7 +43,7 @@ public interface BookingRepository extends Repository<Booking, Long> {
 
     Streamable<Booking> findByItemOwnerIdAndStartAfterOrderByIdDesc(Long bookerId, LocalDateTime now);
 
-    Streamable<Booking> findByItemIdOrderByStartAsc(Long itemId);
+    Streamable<LastOrNextBooking> findByItemIdOrderByStartAsc(Long itemId);
 
     Optional<List<Booking>> findByItemIdAndBookerIdAndStatusAndEndBefore(Long itemId, Long booker,
                                                                          BookingStatus status, LocalDateTime now);

@@ -35,4 +35,6 @@ public class BookingDto {
     private BookingStatus status;
 
     private long itemId;
+
+    private long bookerId;
 }

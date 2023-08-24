@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.Marker;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Validated
@@ -25,45 +27,49 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private static final UserMapper mapper = UserMapper.INSTANCE;
 
     @GetMapping
     public List<UserDto> getAllUsers() {
-        log.info("+UserController - getAllUsers");
-        List<UserDto> users =  userService.getAllUsers();
-        log.info("-UserController - getAllUsers: " + users);
+        log.debug("+UserController - getAllUsers");
+        List<UserDto> users =  userService.getAllUsers()
+                .stream()
+                .map(mapper::userToUserDto)
+                .collect(Collectors.toList());
+        log.debug("-UserController - getAllUsers: " + users);
         return users;
     }
 
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable int userId) {
-        log.info("+UserController - getUserById: userId = " + userId);
-        UserDto user = userService.getUserById(userId);
-        log.info("-UserController - getUserById: " + user);
+        log.debug("+UserController - getUserById: userId = " + userId);
+        UserDto user = mapper.userToUserDto(userService.getUserById(userId));
+        log.debug("-UserController - getUserById: " + user);
         return user;
     }
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
     public UserDto addUser(@Valid @RequestBody UserDto userDto) {
-        log.info("+UserController - addUser: " + userDto);
-        UserDto user = userService.addUser(userDto);
-        log.info("-UserController - addUser: " + user);
+        log.debug("+UserController - addUser: " + userDto);
+        UserDto user = mapper.userToUserDto(userService.addUser(userDto));
+        log.debug("-UserController - addUser: " + user);
         return user;
     }
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable int userId) {
-        log.info("+UserController - updateUser: " + userDto + "userId = " + userId);
-        UserDto user = userService.updateUser(userDto, userId);
-        log.info("-UserController - updateUser: " + user);
+        log.debug("+UserController - updateUser: " + userDto + "userId = " + userId);
+        UserDto user = mapper.userToUserDto(userService.updateUser(userDto, userId));
+        log.debug("-UserController - updateUser: " + user);
         return user;
     }
 
     @DeleteMapping("/{userId}")
     public UserDto deleteUser(@PathVariable int userId) {
-        log.info("+UserController - deleteUser: userId = " + userId);
-        UserDto user = userService.deleteUser(userId);
-        log.info("-UserController - deleteUser: " + user);
+        log.debug("+UserController - deleteUser: userId = " + userId);
+        UserDto user = mapper.userToUserDto(userService.deleteUser(userId));
+        log.debug("-UserController - deleteUser: " + user);
         return user;
     }
 }
