@@ -17,6 +17,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.time.LocalDateTime;
 
 @Data
@@ -46,5 +48,6 @@ public class Booking {
     @ToString.Exclude
     private User booker;
 
+    @Enumerated(EnumType.ORDINAL)
     private BookingStatus status;
 }

@@ -12,13 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.Marker;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Validated
@@ -27,15 +25,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private static final UserMapper mapper = UserMapper.INSTANCE;
 
     @GetMapping
     public List<UserDto> getAllUsers() {
         log.debug("+UserController - getAllUsers");
-        List<UserDto> users =  userService.getAllUsers()
-                .stream()
-                .map(mapper::userToUserDto)
-                .collect(Collectors.toList());
+        List<UserDto> users =  userService.getAllUsers();
         log.debug("-UserController - getAllUsers: " + users);
         return users;
     }
@@ -43,7 +37,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable int userId) {
         log.debug("+UserController - getUserById: userId = " + userId);
-        UserDto user = mapper.userToUserDto(userService.getUserById(userId));
+        UserDto user = userService.getUserById(userId);
         log.debug("-UserController - getUserById: " + user);
         return user;
     }
@@ -52,7 +46,7 @@ public class UserController {
     @Validated({Marker.OnCreate.class})
     public UserDto addUser(@Valid @RequestBody UserDto userDto) {
         log.debug("+UserController - addUser: " + userDto);
-        UserDto user = mapper.userToUserDto(userService.addUser(userDto));
+        UserDto user = userService.addUser(userDto);
         log.debug("-UserController - addUser: " + user);
         return user;
     }
@@ -60,7 +54,7 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable int userId) {
         log.debug("+UserController - updateUser: " + userDto + "userId = " + userId);
-        UserDto user = mapper.userToUserDto(userService.updateUser(userDto, userId));
+        UserDto user = userService.updateUser(userDto, userId);
         log.debug("-UserController - updateUser: " + user);
         return user;
     }
@@ -68,7 +62,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public UserDto deleteUser(@PathVariable int userId) {
         log.debug("+UserController - deleteUser: userId = " + userId);
-        UserDto user = mapper.userToUserDto(userService.deleteUser(userId));
+        UserDto user = userService.deleteUser(userId);
         log.debug("-UserController - deleteUser: " + user);
         return user;
     }

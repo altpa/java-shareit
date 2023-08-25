@@ -22,6 +22,7 @@
 		<lombok-mapstruct-binding.version>0.1.0</lombok-mapstruct-binding.version>
 		<logbook.version>2.14.0</logbook.version>
 		<lombok.version>1.18.28</lombok.version>
+		<jpa.version>2.7.2</jpa.version>
 	</properties>
 
 	<dependencies>
@@ -42,7 +43,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<version>2.7.2</version>
+			<version>${jpa.version}</version>
 		</dependency>
 
 		<dependency>

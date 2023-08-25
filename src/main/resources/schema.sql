@@ -37,3 +37,12 @@ CREATE TABLE IF NOT EXISTS comments (
     created TIMESTAMP NOT NULL,
     CONSTRAINT pk_comment PRIMARY KEY (id)
 );
+
+ALTER TABLE items ADD CONSTRAINT fk_item_owner FOREIGN KEY (owner) REFERENCES users(id);
+ALTER TABLE items ADD CONSTRAINT fk_item_next_booking FOREIGN KEY (next_booking) REFERENCES bookings(id);
+ALTER TABLE items ADD CONSTRAINT fk_item_last_booking FOREIGN KEY (last_booking) REFERENCES bookings(id);
+
+ALTER TABLE bookings ADD CONSTRAINT fk_booking_item FOREIGN KEY (item) REFERENCES items(id);
+ALTER TABLE bookings ADD CONSTRAINT fk_booking_booker FOREIGN KEY (booker) REFERENCES users(id);
+
+ALTER TABLE comments ADD CONSTRAINT fk_comment_item FOREIGN KEY (item) REFERENCES items(id);

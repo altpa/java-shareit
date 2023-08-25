@@ -24,24 +24,25 @@ public class UserServiceImpl implements UserService {
     private static final UserMapper mapper = UserMapper.INSTANCE;
 
     @Override
-    public User addUser(UserDto userDto) {
+    public UserDto addUser(UserDto userDto) {
         log.debug("+UserServiceImpl - addUser: " + userDto);
-        User user = userRepository.save(mapper.userDtoToUser(userDto));
+        UserDto user = mapper.userToUserDto(userRepository.save(mapper.userDtoToUser(userDto)));
         log.debug("-UserServiceImpl - addUser: " + user);
         return user;
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         log.debug("+UserServiceImpl - getAllUsers");
-        List<User> users = StreamSupport.stream(userRepository.findAll().spliterator(), false)
+        List<UserDto> users = StreamSupport.stream(userRepository.findAll().spliterator(), false)
+                .map(mapper::userToUserDto)
                 .collect(toList());
         log.debug("-UserServiceImpl - getAllUsers: " + users);
         return users;
     }
 
     @Override
-    public User updateUser(UserDto userDto, long userId) {
+    public UserDto updateUser(UserDto userDto, long userId) {
         log.debug("+UserServiceImpl - addUser: " + userDto + ". userId = " + userId);
 
         User user = userRepository.findById(userId).orElseThrow(
@@ -54,22 +55,22 @@ public class UserServiceImpl implements UserService {
         user = userRepository.save(user);
 
         log.debug("-UserServiceImpl - addUser: " + user);
-        return user;
+        return mapper.userToUserDto(user);
     }
 
     @Override
-    public User getUserById(long userId) {
+    public UserDto getUserById(long userId) {
         log.debug("+UserServiceImpl - getUserById: userId = " + userId);
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ObjectNotFoundException("Юзера с userId = " + userId + " нет"));
+        UserDto user = mapper.userToUserDto(userRepository.findById(userId).orElseThrow(
+                () -> new ObjectNotFoundException("Юзера с userId = " + userId + " нет")));
         log.debug("-UserServiceImpl - getUserById: " + user);
         return user;
     }
 
     @Override
-    public User deleteUser(long userId) {
+    public UserDto deleteUser(long userId) {
         log.debug("+UserServiceImpl - deleteUser: userId = " + userId);
-        User user = userRepository.deleteById(userId);
+        UserDto user = mapper.userToUserDto(userRepository.deleteById(userId));
         log.debug("-UserServiceImpl - deleteUser: " + user);
         return user;
     }

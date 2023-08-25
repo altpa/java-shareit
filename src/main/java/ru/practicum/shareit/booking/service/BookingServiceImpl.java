@@ -37,7 +37,7 @@ public class BookingServiceImpl implements BookingService {
     private static final BookingMapper mapper = BookingMapper.INSTANCE;
 
     @Override
-    public Booking addBooking(BookingDto bookingDto, long userId) {
+    public BookingDto addBooking(BookingDto bookingDto, long userId) {
         log.debug("+BookingServiceImpl - addBooking: " + bookingDto + ", userId = " + userId);
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
             throw new BadRequestException("start = " + bookingDto.getStart() + " after or equals end = "
@@ -62,13 +62,13 @@ public class BookingServiceImpl implements BookingService {
             .orElseThrow(() -> new ObjectNotFoundException("userId = " + userId + " not found")));
 
         bookingDto.setStatus(WAITING);
-        Booking answer = bookingRepository.save(mapper.bookingDtoToBooking(bookingDto));
+        BookingDto answer = mapper.bookingToBookingDto(bookingRepository.save(mapper.bookingDtoToBooking(bookingDto)));
         log.debug("-BookingServiceImpl - addBooking: " + answer);
         return answer;
     }
 
     @Override
-    public Booking changeStatus(Long bookingId, boolean approved, long userId) {
+    public BookingDto changeStatus(Long bookingId, boolean approved, long userId) {
         log.debug("+BookingServiceImpl - changeStatus: bookingId = " + bookingId + ", approved = " + approved + ", userId = " + userId);
         Booking booking = bookingRepository.findByIdOrderByIdDesc(bookingId)
                 .orElseThrow(() -> new ObjectNotFoundException("bookingId = " + bookingId + " not found"));
@@ -89,17 +89,17 @@ public class BookingServiceImpl implements BookingService {
                     + " not equals userId = " + userId);
         }
 
-        Booking answer = bookingRepository.save(booking);
+        BookingDto answer = mapper.bookingToBookingDto(bookingRepository.save(booking));
         log.debug("-BookingServiceImpl - changeStatus: " + answer);
         return answer;
     }
 
     @Override
-    public Booking getById(long bookingId, long userId) {
+    public BookingDto getById(long bookingId, long userId) {
         log.debug("+BookingServiceImpl - getById: bookingId = " + bookingId + ", userId = " + userId);
         checkUser(userId);
-        Booking booking = bookingRepository.findByIdOrderByIdDesc(bookingId)
-                .orElseThrow(() -> new ObjectNotFoundException("bookingId = " + bookingId + " not found"));
+        BookingDto booking = mapper.bookingToBookingDto(bookingRepository.findByIdOrderByIdDesc(bookingId)
+                .orElseThrow(() -> new ObjectNotFoundException("bookingId = " + bookingId + " not found")));
 
         Item item = booking.getItem();
         long ownerId = item.getOwner().getId();
@@ -115,19 +115,25 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getByUserIdAndStateByBooker(long userId, String state) {
+    public List<BookingDto> getByUserIdAndStateByBooker(long userId, String state) {
         log.debug("+BookingServiceImpl - getByUserIdAndStateByBooker: userId = " + userId + ", state = " + state);
         boolean isBooker = true;
-        List<Booking> answer = getByUserIdAndState(userId, state, isBooker);
+        List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker)
+                .stream()
+                .map(mapper::bookingToBookingDto)
+                .collect(toList());
         log.debug("-BookingServiceImpl - getByUserIdAndStateByBooker: " + answer);
         return answer;
     }
 
     @Override
-    public List<Booking> getByUserIdAndStateByOwner(long userId, String state) {
+    public List<BookingDto> getByUserIdAndStateByOwner(long userId, String state) {
         log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state);
         boolean isBooker = false;
-        List<Booking> answer = getByUserIdAndState(userId, state, isBooker);
+        List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker)
+                .stream()
+                .map(mapper::bookingToBookingDto)
+                .collect(toList());
         log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state);
         return answer;
     }
