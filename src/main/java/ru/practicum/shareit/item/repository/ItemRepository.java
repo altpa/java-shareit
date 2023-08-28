@@ -27,4 +27,6 @@ public interface ItemRepository extends Repository<Item, Long> {
     findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String searchName, String searchDescription);
 
     Streamable<Item> findByOwnerId(Long ownerId);
+
+    Streamable<Item> findByRequestId(Long requestId);
 }
