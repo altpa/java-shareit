@@ -21,12 +21,13 @@ public interface ItemRepository extends Repository<Item, Long> {
 
     void delete(Item item);
 
-    boolean existsById(Long primaryKey);
+    boolean existsByOwnerId(Long primaryKey);
 
     Streamable<Item>
     findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String searchName, String searchDescription);
 
     Streamable<Item> findByOwnerId(Long ownerId);
+    Streamable<Item> findByOwnerIdAndRequestId(Long ownerId, Long requestId);
 
     Streamable<Item> findByRequestId(Long requestId);
 }

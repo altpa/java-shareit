@@ -36,10 +36,10 @@ public class Request {
     @Column(name = "created")
     private LocalDateTime created;
 
-    @OneToMany
-    @JoinColumn(name = "items")
-    @ToString.Exclude
-    private Set<Item> items;
+//    @OneToMany
+//    @JoinColumn(name = "items")
+//    @ToString.Exclude
+//    private Set<Item> items;
 
     @Column(name = "owner_id")
     private long ownerId;

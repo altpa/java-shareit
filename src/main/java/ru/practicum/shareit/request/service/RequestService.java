@@ -9,7 +9,7 @@ public interface RequestService {
 
     List<RequestsDto> getOwnRequests(long ownerId);
 
-    List<RequestsDto> getAllRequest(int from, int size);
+    List<RequestsDto> getAllRequest(int from, int size, long userId);
 
-    RequestsDto getRequestById(long requestId);
+    RequestsDto getRequestById(long requestId, long userId);
 }

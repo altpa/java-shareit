@@ -15,6 +15,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @Data
@@ -53,20 +54,25 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> getByUserIdAndStateByBooker(@RequestHeader(HEADER) long userId,
-                                        @RequestParam(defaultValue = "ALL") String state) {
-        log.debug("+BookingController - getByUserIdAndState: userId = " + userId +  ", state = " + state);
-        List<BookingDto> answer =  bookingService.getByUserIdAndStateByBooker(userId, state);
+    public List<BookingDto> getByUserIdAndStateByBooker(
+                                        @RequestHeader(HEADER) long userId,
+                                        @RequestParam(defaultValue = "ALL") String state,
+                                        @RequestParam(name = "from", defaultValue = "0") @Min(0) int from,
+                                        @RequestParam(name = "size", defaultValue = "10") @Min(1) int size) {
+        log.info("+BookingController - getByUserIdAndState: userId = " + userId +  ", state = " + state);
+        List<BookingDto> answer =  bookingService.getByUserIdAndStateByBooker(userId, state, from, size);
 
-        log.debug("+BookingController - getByUserIdAndState: answer = " + answer);
+        log.info("+BookingController - getByUserIdAndState: answer = " + answer);
         return answer;
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getByUserIdAndStateByOwner(@RequestHeader(HEADER) long userId,
-                                         @RequestParam(defaultValue = "ALL") String state) {
+                                        @RequestParam(defaultValue = "ALL") String state,
+                                        @RequestParam(name = "from", defaultValue = "0") @Min(0) int from,
+                                        @RequestParam(name = "size", defaultValue = "10") @Min(1) int size) {
         log.debug("+BookingController - getByOwnerId: userId = " + userId +  ", state = " + state);
-        List<BookingDto> answer = bookingService.getByUserIdAndStateByOwner(userId, state);
+        List<BookingDto> answer = bookingService.getByUserIdAndStateByOwner(userId, state, from, size);
         log.debug("+BookingController - getByOwnerId: answer = " + answer);
         return answer;
     }

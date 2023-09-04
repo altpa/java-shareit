@@ -46,17 +46,18 @@ public class requestController {
 
     @GetMapping("/all")
     List<RequestsDto> getAllRequest(@RequestParam(name = "from", defaultValue = "0") @Min(0) int from,
-                                    @RequestParam(name = "size", defaultValue = "10") @Min(1) int size) {
+                                    @RequestParam(name = "size", defaultValue = "10") @Min(1) int size,
+                                    @RequestHeader(HEADER) long userId) {
         log.info("+requestController - getAllRequest: from = " + from + ", size = " + size);
-        List<RequestsDto> answer = requestService.getAllRequest(from, size);
+        List<RequestsDto> answer = requestService.getAllRequest(from, size, userId);
         log.info("-requestController - getAllRequest: " + answer);
         return answer;
     }
 
     @GetMapping("/{requestId}")
-    RequestsDto getRequestById(@PathVariable long requestId) {
+    RequestsDto getRequestById(@PathVariable long requestId, @RequestHeader(HEADER) long userId) {
         log.info("+requestController - getRequestById: requestId = " + requestId);
-        RequestsDto answer = requestService.getRequestById(requestId);
+        RequestsDto answer = requestService.getRequestById(requestId, userId);
         log.info("-requestController - getRequestById: " + answer);
         return answer;
     }

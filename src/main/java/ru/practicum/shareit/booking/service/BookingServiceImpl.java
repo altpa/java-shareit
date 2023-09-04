@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -115,25 +117,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getByUserIdAndStateByBooker(long userId, String state) {
-        log.debug("+BookingServiceImpl - getByUserIdAndStateByBooker: userId = " + userId + ", state = " + state);
+    public List<BookingDto> getByUserIdAndStateByBooker(long userId, String state, int from, int size) {
+        log.info("+BookingServiceImpl - getByUserIdAndStateByBooker: userId = " + userId + ", state = " + state
+                + ", from = " + from + ", size = " + size);
         boolean isBooker = true;
-        List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker)
-                .stream()
-                .map(mapper::bookingToBookingDto)
-                .collect(toList());
-        log.debug("-BookingServiceImpl - getByUserIdAndStateByBooker: " + answer);
+        List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker, from, size);
+        log.info("-BookingServiceImpl - getByUserIdAndStateByBooker: " + answer);
         return answer;
     }
 
     @Override
-    public List<BookingDto> getByUserIdAndStateByOwner(long userId, String state) {
-        log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state);
+    public List<BookingDto> getByUserIdAndStateByOwner(long userId, String state, int from, int size) {
+        log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state
+                + ", from = " + from + ", size = " + size);
         boolean isBooker = false;
-        List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker)
-                .stream()
-                .map(mapper::bookingToBookingDto)
-                .collect(toList());
+        List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker, from, size);
         log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state);
         return answer;
     }
@@ -158,7 +156,8 @@ public class BookingServiceImpl implements BookingService {
                 .filter(b -> b.getStatus().equals(APPROVED))
                 .collect(Collectors.toList());
 
-        log.debug("ItemServiceImpl - getBookingToItem: bookings = " + bookings + ", LocalDateTime.now() = " + LocalDateTime.now());
+        log.debug("ItemServiceImpl - getBookingToItem: bookings = " + bookings
+                + ", LocalDateTime.now() = " + LocalDateTime.now());
         LastOrNextBooking answer = null;
         if (item.getOwner().getId() == ownerId && !bookings.isEmpty()) {
             LocalDateTime now = LocalDateTime.now();
@@ -180,53 +179,58 @@ public class BookingServiceImpl implements BookingService {
         return answer;
     }
 
-    private List<Booking> getByUserIdAndState(long userId, String state, boolean isBooker) {
+    private List<BookingDto> getByUserIdAndState(long userId, String state, boolean isBooker, int from, int size) {
         Streamable<Booking> booking;
         checkUser(userId);
+        Pageable page = PageRequest.of(from, size);
         switch (state) {
             case "ALL":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdOrderByIdDesc(userId);
+                    booking = bookingRepository.findByBookerIdOrderByIdDesc(userId, page);
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdOrderByIdDesc(userId);
+                    booking = bookingRepository.findByItemOwnerIdOrderByIdDesc(userId, page);
                 }
                 break;
             case "CURRENT":
                 LocalDateTime now = LocalDateTime.now();
                 if (isBooker) {
                     booking = bookingRepository
-                            .findByBookerIdAndStartBeforeAndEndAfterOrderByIdAsc(userId, now, now);
+                            .findByBookerIdAndStartBeforeAndEndAfterOrderByIdAsc(userId, now, now, page);
                 } else {
                     booking = bookingRepository
-                            .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByIdAsc(userId, now, now);
+                            .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByIdAsc(userId, now, now, page);
                 }
                 break;
             case "PAST":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndEndBeforeOrderByIdDesc(userId, LocalDateTime.now());
+                    booking = bookingRepository
+                            .findByBookerIdAndEndBeforeOrderByIdDesc(userId, LocalDateTime.now(), page);
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByIdDesc(userId, LocalDateTime.now());
+                    booking = bookingRepository
+                            .findByItemOwnerIdAndEndBeforeOrderByIdDesc(userId, LocalDateTime.now(), page);
                 }
                 break;
             case "FUTURE":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndStartAfterOrderByIdDesc(userId, LocalDateTime.now());
+                    booking = bookingRepository
+                            .findByBookerIdAndStartAfterOrderByIdDesc(userId, LocalDateTime.now(), page);
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndStartAfterOrderByIdDesc(userId, LocalDateTime.now());
+                    booking = bookingRepository
+                            .findByItemOwnerIdAndStartAfterOrderByIdDesc(userId, LocalDateTime.now(), page);
                 }
                 break;
             case "WAITING":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndStatusOrderByIdDesc(userId, WAITING);
+                    booking = bookingRepository.findByBookerIdAndStatusOrderByIdDesc(userId, WAITING, page);
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndStatusOrderByIdDesc(userId, WAITING);
+                    booking = bookingRepository.findByItemOwnerIdAndStatusOrderByIdDesc(userId, WAITING, page);
                 }
                 break;
             case "REJECTED":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndStatusOrderByIdDesc(userId, REJECTED);
+                    booking = bookingRepository.findByBookerIdAndStatusOrderByIdDesc(userId, REJECTED, page);
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndStatusOrderByIdDesc(userId, REJECTED);
+                    booking = bookingRepository.findByItemOwnerIdAndStatusOrderByIdDesc(userId, REJECTED, page);
                 }
                 break;
             default:
@@ -234,6 +238,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return booking.stream()
+                .map(mapper::bookingToBookingDto)
                 .collect(toList());
     }
 
