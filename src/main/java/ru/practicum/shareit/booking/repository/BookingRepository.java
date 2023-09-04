@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.LastOrNextBooking;
-import ru.practicum.shareit.request.model.Request;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +24,7 @@ public interface BookingRepository extends Repository<Booking, Long>, PagingAndS
 
     Page<Booking> findByBookerIdOrderByIdDesc(Long bookerId, Pageable pageable);
 
-    Page <Booking> findByBookerIdAndStatusOrderByIdDesc(Long bookerId, BookingStatus status, Pageable pageable);
+    Page<Booking> findByBookerIdAndStatusOrderByIdDesc(Long bookerId, BookingStatus status, Pageable pageable);
 
     Page<Booking>
     findByBookerIdAndStartBeforeAndEndAfterOrderByIdAsc(Long bookerId, LocalDateTime nowForStart,

@@ -14,7 +14,6 @@ import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +87,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void checkUser(long ownerId) {
-        if(userService.checkOwner(ownerId).equals(false)) {
+        if (userService.checkOwner(ownerId).equals(false)) {
             throw new ObjectNotFoundException("userId = " + ownerId + " not found");
         }
     }

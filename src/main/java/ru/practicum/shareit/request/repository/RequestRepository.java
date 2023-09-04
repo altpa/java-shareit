@@ -15,6 +15,7 @@ import java.util.Optional;
 @Transactional
 public interface RequestRepository  extends Repository<Request, Long>, PagingAndSortingRepository<Request, Long> {
     Request save(Request request);
+
     Optional<Request> findById(long id);
 
     Streamable<Request> findByOwnerId(long ownerId);

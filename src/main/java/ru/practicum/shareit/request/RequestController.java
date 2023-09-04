@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/requests")
 @RequiredArgsConstructor
-public class requestController {
+public class RequestController {
     private final RequestService requestService;
 
     private static final String HEADER = "X-Sharer-User-Id";
