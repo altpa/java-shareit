@@ -182,55 +182,68 @@ public class BookingServiceImpl implements BookingService {
     private List<BookingDto> getByUserIdAndState(long userId, String state, boolean isBooker, int from, int size) {
         Streamable<Booking> booking;
         checkUser(userId);
-        Pageable page = PageRequest.of(from, size);
         switch (state) {
             case "ALL":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdOrderByIdDesc(userId, page);
+                    booking = bookingRepository
+                            .findByBookerIdOrderByIdDesc(userId, getPage(isBooker, userId, from, size));
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdOrderByIdDesc(userId, page);
+                    booking = bookingRepository
+                            .findByItemOwnerIdOrderByIdDesc(userId, getPage(isBooker, userId, from, size));
                 }
                 break;
             case "CURRENT":
                 LocalDateTime now = LocalDateTime.now();
                 if (isBooker) {
                     booking = bookingRepository
-                            .findByBookerIdAndStartBeforeAndEndAfterOrderByIdAsc(userId, now, now, page);
+                            .findByBookerIdAndStartBeforeAndEndAfterOrderByIdAsc
+                                    (userId, now, now, getPage(isBooker, userId, from, size));
                 } else {
                     booking = bookingRepository
-                            .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByIdAsc(userId, now, now, page);
+                            .findByItemOwnerIdAndStartBeforeAndEndAfterOrderByIdAsc
+                                    (userId, now, now, getPage(isBooker, userId, from, size));
                 }
                 break;
             case "PAST":
                 if (isBooker) {
                     booking = bookingRepository
-                            .findByBookerIdAndEndBeforeOrderByIdDesc(userId, LocalDateTime.now(), page);
+                            .findByBookerIdAndEndBeforeOrderByIdDesc
+                                    (userId, LocalDateTime.now(), getPage(isBooker, userId, from, size));
                 } else {
                     booking = bookingRepository
-                            .findByItemOwnerIdAndEndBeforeOrderByIdDesc(userId, LocalDateTime.now(), page);
+                            .findByItemOwnerIdAndEndBeforeOrderByIdDesc
+                                    (userId, LocalDateTime.now(), getPage(isBooker, userId, from, size));
                 }
                 break;
             case "FUTURE":
                 if (isBooker) {
                     booking = bookingRepository
-                            .findByBookerIdAndStartAfterOrderByIdDesc(userId, LocalDateTime.now(), page);
+                            .findByBookerIdAndStartAfterOrderByIdDesc
+                                    (userId, LocalDateTime.now(), getPage(isBooker, userId, from, size));
                 } else {
                     booking = bookingRepository
-                            .findByItemOwnerIdAndStartAfterOrderByIdDesc(userId, LocalDateTime.now(), page);
+                            .findByItemOwnerIdAndStartAfterOrderByIdDesc
+                                    (userId, LocalDateTime.now(), getPage(isBooker, userId, from, size));
                 }
                 break;
             case "WAITING":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndStatusOrderByIdDesc(userId, WAITING, page);
+                    booking = bookingRepository.findByBookerIdAndStatusOrderByIdDesc
+                            (userId, WAITING, getPage(isBooker, userId, from, size));
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndStatusOrderByIdDesc(userId, WAITING, page);
+                    booking = bookingRepository.findByItemOwnerIdAndStatusOrderByIdDesc
+                            (userId, WAITING, getPage(isBooker, userId, from, size));
                 }
                 break;
             case "REJECTED":
                 if (isBooker) {
-                    booking = bookingRepository.findByBookerIdAndStatusOrderByIdDesc(userId, REJECTED, page);
+                    booking = bookingRepository
+                            .findByBookerIdAndStatusOrderByIdDesc
+                                    (userId, REJECTED, getPage(isBooker, userId, from, size));
                 } else {
-                    booking = bookingRepository.findByItemOwnerIdAndStatusOrderByIdDesc(userId, REJECTED, page);
+                    booking = bookingRepository
+                            .findByItemOwnerIdAndStatusOrderByIdDesc
+                                    (userId, REJECTED, getPage(isBooker, userId, from, size));
                 }
                 break;
             default:
@@ -246,6 +259,19 @@ public class BookingServiceImpl implements BookingService {
         if (Boolean.FALSE.equals(userRepository.existsById(userId))) {
             throw new ObjectNotFoundException("userId = " + userId + " not found");
         }
+    }
+
+    private Pageable getPage(boolean isBooker, long userId, int from, int size) {
+        long total;
+        if (isBooker) {
+            total = bookingRepository.countByBookerId(userId);
+        } else {
+            total = bookingRepository.countByItemOwnerId(userId);
+        }
+        if (total < from + size) {
+            size = (int) total - from;
+        }
+        return PageRequest.of(from, size);
     }
 }
 
