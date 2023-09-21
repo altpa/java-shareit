@@ -15,14 +15,6 @@ public interface ItemRepository extends Repository<Item, Long> {
 
     Optional<Item> findById(Long primaryKey);
 
-    Streamable<Item> findAll();
-
-    long count();
-
-    void delete(Item item);
-
-    boolean existsByOwnerId(Long primaryKey);
-
     Streamable<Item>
     findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String searchName, String searchDescription);
 

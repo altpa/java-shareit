@@ -52,5 +52,6 @@ public interface BookingRepository extends Repository<Booking, Long>, PagingAndS
                                                                          BookingStatus status, LocalDateTime now);
 
     long countByBookerId(long userId);
+
     long countByItemOwnerId(long userId);
 }

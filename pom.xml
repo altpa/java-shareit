@@ -23,6 +23,8 @@
 		<logbook.version>2.14.0</logbook.version>
 		<lombok.version>1.18.28</lombok.version>
 		<jpa.version>2.7.2</jpa.version>
+		<jeasy.version>5.0.0</jeasy.version>
+		<jackson.version>2.13.4</jackson.version>
 	</properties>
 
 	<dependencies>
@@ -104,6 +106,17 @@
 			<version>${logbook.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.jeasy</groupId>
+			<artifactId>easy-random-core</artifactId>
+			<version>${jeasy.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
 
 	</dependencies>
 
