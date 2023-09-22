@@ -46,7 +46,7 @@ class ItemControllerTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
-    private ItemDto itemDto;
+    private ItemDto createdItemDto;
 
     @BeforeEach
     public void setUp() {
@@ -54,9 +54,9 @@ class ItemControllerTest {
                 .standaloneSetup(controller)
                 .build();
 
-        itemDto = generator.nextObject(ItemDto.class);
-        itemDto.setLastBooking(null);
-        itemDto.setNextBooking(null);
+        createdItemDto = generator.nextObject(ItemDto.class);
+        createdItemDto.setLastBooking(null);
+        createdItemDto.setNextBooking(null);
 
         mapper.registerModule(new JavaTimeModule());
     }
@@ -65,86 +65,86 @@ class ItemControllerTest {
     void addItem() throws Exception {
         when(itemService.addItem(any(ItemDto.class), anyLong(), anyBoolean()))
                 .thenAnswer(invocationOnMock -> {
-                    return itemDto;
+                    return createdItemDto;
                 });
 
         when(userService.checkOwner(anyLong())).thenReturn(true);
 
         mvc.perform(post("/items")
-                        .content(mapper.writeValueAsString(itemDto))
-                        .header("X-Sharer-User-Id", String.valueOf(itemDto.getOwner().getId()))
+                        .content(mapper.writeValueAsString(createdItemDto))
+                        .header("X-Sharer-User-Id", String.valueOf(createdItemDto.getOwner().getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(itemDto.getId()));
+                .andExpect(jsonPath("$.id").value(createdItemDto.getId()));
     }
 
     @Test
     void getAllItemsByOwnerId() throws Exception {
         when(itemService.getAllItemsByOwnerId(anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return List.of(itemDto);
+                    return List.of(createdItemDto);
                 });
 
         mvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", String.valueOf(itemDto.getOwner().getId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdItemDto.getOwner().getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(itemDto.getId()));
+                .andExpect(jsonPath("$[0].id").value(createdItemDto.getId()));
     }
 
     @Test
     void updateItem() throws Exception {
         when(itemService.updateItem(any(ItemDto.class), anyLong(), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return itemDto;
+                    return createdItemDto;
                 });
 
         when(userService.checkOwner(anyLong())).thenReturn(true);
 
-        mvc.perform(patch("/items/{itemId}", String.valueOf(itemDto.getId()))
-                        .content(mapper.writeValueAsString(itemDto))
-                        .header("X-Sharer-User-Id", String.valueOf(itemDto.getOwner().getId()))
+        mvc.perform(patch("/items/{itemId}", String.valueOf(createdItemDto.getId()))
+                        .content(mapper.writeValueAsString(createdItemDto))
+                        .header("X-Sharer-User-Id", String.valueOf(createdItemDto.getOwner().getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(itemDto.getId()));
+                .andExpect(jsonPath("$.id").value(createdItemDto.getId()));
     }
 
     @Test
     void getItemById() throws Exception {
         when(itemService.getItemById(anyLong(), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return itemDto;
+                    return createdItemDto;
                 });
 
-        mvc.perform(get("/items/{itemId}", String.valueOf(itemDto.getId()))
-                        .header("X-Sharer-User-Id", String.valueOf(itemDto.getOwner().getId()))
+        mvc.perform(get("/items/{itemId}", String.valueOf(createdItemDto.getId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdItemDto.getOwner().getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(itemDto.getId()));
+                .andExpect(jsonPath("$.id").value(createdItemDto.getId()));
     }
 
     @Test
     void searchItems() throws Exception {
         when(itemService.searchItems(anyString()))
                 .thenAnswer(invocationOnMock -> {
-                    return List.of(itemDto);
+                    return List.of(createdItemDto);
                 });
 
         mvc.perform(get("/items/search")
-                        .param("text", itemDto.getName())
+                        .param("text", createdItemDto.getName())
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(itemDto.getId()));
+                .andExpect(jsonPath("$[0].id").value(createdItemDto.getId()));
     }
 
     @Test
@@ -158,9 +158,9 @@ class ItemControllerTest {
                     return comment;
                 });
 
-        mvc.perform(post("/items/{itemId}/comment", String.valueOf(itemDto.getId()))
+        mvc.perform(post("/items/{itemId}/comment", String.valueOf(createdItemDto.getId()))
                         .content(mapper.writeValueAsString(comment))
-                        .header("X-Sharer-User-Id", String.valueOf(itemDto.getOwner().getId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdItemDto.getOwner().getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))

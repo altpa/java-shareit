@@ -54,22 +54,22 @@ class BookingDtoTest {
     @Autowired
     private JacksonTester<BookingDto> tester;
 
-    private BookingDto bookingDto;
+    private BookingDto createdBookingDto;
 
     @BeforeEach
     public void setUp() {
-        bookingDto = new BookingDto();
-        bookingDto.setId(ID);
-        bookingDto.setStart(LocalDateTime.parse(START));
-        bookingDto.setEnd(LocalDateTime.parse(END));
-        bookingDto.setStatus(STATUS);
-        bookingDto.setItemId(ITEM_ID);
-        bookingDto.setBookerId(BOOKER_ID);
+        createdBookingDto = new BookingDto();
+        createdBookingDto.setId(ID);
+        createdBookingDto.setStart(LocalDateTime.parse(START));
+        createdBookingDto.setEnd(LocalDateTime.parse(END));
+        createdBookingDto.setStatus(STATUS);
+        createdBookingDto.setItemId(ITEM_ID);
+        createdBookingDto.setBookerId(BOOKER_ID);
     }
 
     @Test
     void bookingDtoSerializes() throws IOException {
-        JsonContent<BookingDto> result = tester.write(bookingDto);
+        JsonContent<BookingDto> result = tester.write(createdBookingDto);
 
         assertThat(result).extractingJsonPathStringValue("$.start").isEqualTo(START);
         assertThat(result).extractingJsonPathStringValue("$.end").isEqualTo(END);

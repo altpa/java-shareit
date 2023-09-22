@@ -29,19 +29,19 @@ class UserDtoTest {
     @Autowired
     private JacksonTester<UserDto> tester;
 
-    private UserDto userDto;
+    private UserDto createdUserDto;
 
     @BeforeEach
     public void setUp() {
-        userDto = new UserDto();
-        userDto.setId(ID);
-        userDto.setName(NAME);
-        userDto.setEmail(EMAIL);
+        createdUserDto = new UserDto();
+        createdUserDto.setId(ID);
+        createdUserDto.setName(NAME);
+        createdUserDto.setEmail(EMAIL);
     }
 
     @Test
     void userDtoSerializes() throws IOException {
-        JsonContent<UserDto> result = tester.write(userDto);
+        JsonContent<UserDto> result = tester.write(createdUserDto);
 
         assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo(NAME);
         assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo(EMAIL);

@@ -44,6 +44,10 @@ class BookingServiceImplTest {
     private static final BookingMapper mapper = BookingMapper.INSTANCE;
     private static final EasyRandom generator = new EasyRandom();
 
+    private static final int PAGE = 0;
+    private static final int FROM = 0;
+    private static final int SIZE = 3;
+
     @Mock
     private BookingRepository bookingRepository;
 
@@ -66,7 +70,8 @@ class BookingServiceImplTest {
     private Booking booking2;
     private Booking booking3;
     private LocalDateTime now;
-    private final long falseId = 10;
+    private Page<Booking> page;
+    private List<Booking> bookings;
 
     @BeforeEach
     public void setUp() {
@@ -112,6 +117,11 @@ class BookingServiceImplTest {
         booking3.setStart(now.plusDays(5));
         booking3.setEnd(now.plusDays(6));
         booking3.setStatus(WAITING);
+
+        bookings = List.of(booking1, booking2, booking3);
+
+        Pageable pageable = PageRequest.of(PAGE, SIZE);
+        page = new PageImpl<>(bookings, pageable, SIZE);
     }
 
     @Test
@@ -297,11 +307,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByBookerWhenStateAll() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "ALL";
 
         when(bookingRepository
@@ -310,14 +315,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByBookerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -326,11 +331,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByBookerWhenStateAllAndTotalLess() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "ALL";
 
         when(bookingRepository
@@ -339,14 +339,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByBookerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, 1, 10);
+                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, FROM + 1, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -355,11 +355,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByOwnerWhenStateAllAndTotalLess() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "ALL";
 
         when(bookingRepository
@@ -368,14 +363,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByItemOwnerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 1, 10);
+                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM + 1, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -384,11 +379,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByOwnerWhenStateAll() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "ALL";
 
         when(bookingRepository
@@ -397,14 +387,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByItemOwnerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -413,11 +403,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByBookerWhenStateCurrent() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "CURRENT";
 
         when(bookingRepository
@@ -427,14 +412,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByBookerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -443,11 +428,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByOwnerWhenStateCurrent() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "CURRENT";
 
         when(bookingRepository
@@ -457,14 +437,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByItemOwnerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -473,11 +453,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByBookerWhenStatePast() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "PAST";
 
         when(bookingRepository
@@ -487,14 +462,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByBookerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -503,11 +478,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByOwnerWhenStatePast() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "PAST";
 
         when(bookingRepository
@@ -517,14 +487,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByItemOwnerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -533,11 +503,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByBookerWhenStateFuture() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "FUTURE";
 
         when(bookingRepository
@@ -547,14 +512,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByBookerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -563,11 +528,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByOwnerWhenStateFuture() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "FUTURE";
 
         when(bookingRepository
@@ -577,14 +537,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByItemOwnerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -593,11 +553,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByBookerWhenStateWaiting() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "WAITING";
 
         when(bookingRepository
@@ -607,14 +562,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByBookerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -623,11 +578,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByOwnerWhenStateWaiting() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "WAITING";
 
         when(bookingRepository
@@ -637,14 +587,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByItemOwnerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -653,11 +603,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByBookerWhenStateRejected() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "REJECTED";
 
         when(bookingRepository
@@ -667,14 +612,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByBookerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByBooker(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -683,11 +628,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByOwnerWhenStateRejected() {
-        List<Booking> bookings = List.of(booking1, booking2, booking3);
-
-        Pageable pageable = PageRequest.of(0, 3);
-        long size = 3;
-        Page<Booking> page = new PageImpl<>(bookings, pageable, size);
         String state = "REJECTED";
 
         when(bookingRepository
@@ -697,14 +637,14 @@ class BookingServiceImplTest {
 
         when(bookingRepository
                 .countByItemOwnerId(Mockito.anyLong()))
-                .thenReturn(size);
+                .thenReturn((long) SIZE);
 
         when(userRepository
                 .existsById(Mockito.anyLong()))
                 .thenReturn(true);
 
         List<BookingDto> answerDto =
-                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 0, (int) size);
+                bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM, SIZE);
 
         List<Booking> answer = answerDto.stream().map(mapper::bookingDtoToBooking).collect(toList());
 
@@ -713,7 +653,6 @@ class BookingServiceImplTest {
 
     @Test
     void getByUserIdAndStateByOwnerWhenUnknownState() {
-        long size = 3;
         String state = "UNKNOWN";
 
         when(userRepository
@@ -722,13 +661,12 @@ class BookingServiceImplTest {
 
         assertThrows(ObjectsDbException.class, () -> {
             List<BookingDto> answerDto =
-                    bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 0, (int) size);
+                    bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM, SIZE);
         });
     }
 
     @Test
     void getByUserIdAndStateByOwnerWhenNoUser() {
-        long size = 3;
         String state = "ALL";
 
         when(userRepository
@@ -737,7 +675,7 @@ class BookingServiceImplTest {
 
         assertThrows(ObjectNotFoundException.class, () -> {
             List<BookingDto> answerDto =
-                    bookingService.getByUserIdAndStateByOwner(user1.getId(), state, 0, (int) size);
+                    bookingService.getByUserIdAndStateByOwner(user1.getId(), state, FROM, SIZE);
         });
     }
 }

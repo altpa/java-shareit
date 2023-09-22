@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.LastOrNextBooking;
@@ -34,12 +35,14 @@ import static ru.practicum.shareit.booking.BookingStatus.APPROVED;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
+    private static final CommentMapper commentMapper = CommentMapper.INSTANCE;
+    private static final ItemMapper itemMapper = ItemMapper.INSTANCE;
+    private static final int FROM = 0;
+    private static final int SIZE = 10;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
-    private static final ItemMapper itemMapper = ItemMapper.INSTANCE;
-    private static final CommentMapper commentMapper = CommentMapper.INSTANCE;
 
     @Override
     public ItemDto addItem(ItemDto itemDto, long ownerId, boolean isOwnerExist) {
@@ -54,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getAllItemsByOwnerId(long ownerId) {
         log.debug("+ItemServiceImpl - getAllItemsByOwnerId: ownerId = " + ownerId);
-        List<ItemDto> allItemsByOwnerId = itemRepository.findByOwnerId(ownerId)
+        List<ItemDto> allItemsByOwnerId = itemRepository.findByOwnerId(ownerId, PageRequest.of(FROM, SIZE))
                 .stream()
                 .map(itemMapper::itemToItemDto)
                 .collect(toList());
@@ -106,7 +109,8 @@ public class ItemServiceImpl implements ItemService {
         log.debug("+ItemServiceImpl - searchItems: searchText = " + searchText);
         if (!searchText.isEmpty()) {
             List<ItemDto> items = itemRepository
-                    .findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(searchText, searchText)
+                    .findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(searchText,
+                            searchText, PageRequest.of(FROM, SIZE))
                     .stream()
                     .map(itemMapper::itemToItemDto)
                     .collect(toList());

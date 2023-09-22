@@ -29,11 +29,11 @@ import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 @Slf4j
 @Service
 public class BookingServiceImpl implements BookingService {
+    private static final BookingMapper mapper = BookingMapper.INSTANCE;
+
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-
-    private static final BookingMapper mapper = BookingMapper.INSTANCE;
 
     @Override
     public BookingDto addBooking(BookingDto bookingDto, long userId) {

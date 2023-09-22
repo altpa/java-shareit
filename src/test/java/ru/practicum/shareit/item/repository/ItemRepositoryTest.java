@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.Request;
@@ -20,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 class ItemRepositoryTest {
     private final EasyRandom generator = new EasyRandom();
+
+    private static final int FROM = 0;
+    private static final int SIZE = 10;
 
     @Autowired
     private UserRepository userRepository;
@@ -94,7 +98,8 @@ class ItemRepositoryTest {
         itemRepository.save(actualItem2);
 
         List<Item> items = itemRepository.findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
-                "Name1", "Description1").get().collect(Collectors.toList());
+                "Name1", "Description1", PageRequest.of(FROM, SIZE))
+                .get().collect(Collectors.toList());
 
         assertEquals(1, items.size());
         assertEquals(actualItem1, items.get(0));
@@ -102,7 +107,8 @@ class ItemRepositoryTest {
 
     @Test
     void findByOwnerId() {
-        List<Item> items = itemRepository.findByOwnerId(actualUser1.getId()).get().collect(Collectors.toList());
+        List<Item> items = itemRepository.findByOwnerId(actualUser1.getId(), PageRequest.of(FROM, SIZE))
+                .get().collect(Collectors.toList());
         assertEquals(1, items.size());
         assertEquals(actualItem1, items.get(0));
     }

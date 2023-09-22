@@ -62,7 +62,7 @@ class RequestsDtoTest {
     @Autowired
     private JacksonTester<RequestsDto> tester;
 
-    private RequestsDto requestsDto;
+    private RequestsDto createdRequestsDto;
 
     @BeforeEach
     public void setUp() {
@@ -77,22 +77,22 @@ class RequestsDtoTest {
         item.setOwner(owner);
         item.setRequestId(ID);
 
-        requestsDto = new RequestsDto();
-        requestsDto.setId(ID);
-        requestsDto.setOwnerId(OWNER_ID);
-        requestsDto.setDescription(DESCRIPTION);
-        requestsDto.setCreated(LocalDateTime.parse(NOW));
-        requestsDto.setItems(Set.of(item));
+        createdRequestsDto = new RequestsDto();
+        createdRequestsDto.setId(ID);
+        createdRequestsDto.setOwnerId(OWNER_ID);
+        createdRequestsDto.setDescription(DESCRIPTION);
+        createdRequestsDto.setCreated(LocalDateTime.parse(NOW));
+        createdRequestsDto.setItems(Set.of(item));
     }
 
     @Test
     void requestDtoSerializes() throws IOException {
-        JsonContent<RequestsDto> result = tester.write(requestsDto);
+        JsonContent<RequestsDto> result = tester.write(createdRequestsDto);
 
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo(DESCRIPTION);
 
         assertThat(result).extractingJsonPathStringValue("$.created")
-                .isEqualTo(requestsDto.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+                .isEqualTo(createdRequestsDto.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
     }
 
     @Test

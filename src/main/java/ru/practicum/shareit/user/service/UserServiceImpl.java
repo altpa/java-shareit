@@ -20,8 +20,8 @@ import static java.util.stream.Collectors.toList;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
     private static final UserMapper mapper = UserMapper.INSTANCE;
+    private final UserRepository userRepository;
 
     @Override
     public UserDto addUser(UserDto userDto) {

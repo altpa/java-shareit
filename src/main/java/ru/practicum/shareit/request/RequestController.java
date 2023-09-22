@@ -24,9 +24,9 @@ import java.util.List;
 @RequestMapping("/requests")
 @RequiredArgsConstructor
 public class RequestController {
-    private final RequestService requestService;
-
     private static final String HEADER = "X-Sharer-User-Id";
+
+    private final RequestService requestService;
 
     @PostMapping
     RequestsDto addRequest(@Valid @RequestBody RequestsDto requestsDto, @RequestHeader(HEADER) long ownerId) {

@@ -42,34 +42,34 @@ class ItemServiceImplIntegrationTest {
     @Autowired
     private ItemService itemService;
 
-    ItemDto itemDto1;
-    ItemDto itemDto;
-    UserDto userDto1;
-    UserDto userDto2;
+    ItemDto actualItemDto1;
+    ItemDto actualItemDto;
+    UserDto actualUserDto1;
+    UserDto actualUserDto2;
 
     @BeforeEach
     public void setUp() {
-        userDto1 = userService.addUser(userMapper.userToUserDto(generator.nextObject(User.class)));
-        userDto2 = userService.addUser(userMapper.userToUserDto(generator.nextObject(User.class)));
+        actualUserDto1 = userService.addUser(userMapper.userToUserDto(generator.nextObject(User.class)));
+        actualUserDto2 = userService.addUser(userMapper.userToUserDto(generator.nextObject(User.class)));
 
-        itemDto1 = itemMapper.itemToItemDto(generator.nextObject(Item.class));
-        itemDto1.setOwner(userMapper.userDtoToUser(userDto1));
+        actualItemDto1 = itemMapper.itemToItemDto(generator.nextObject(Item.class));
+        actualItemDto1.setOwner(userMapper.userDtoToUser(actualUserDto1));
 
-        itemDto =
-            itemService.addItem(itemDto1, userDto1.getId(), userService.checkOwner(userDto1.getId()));
+        actualItemDto =
+            itemService.addItem(actualItemDto1, actualUserDto1.getId(), userService.checkOwner(actualUserDto1.getId()));
     }
 
     @Test
     @DirtiesContext
     void addItem() {
-        assertEquals(1, itemDto.getId());
+        assertEquals(1, actualItemDto.getId());
     }
 
     @Test
     @DirtiesContext
     void getAllItemsByOwnerId() {
-        assertEquals(1, itemService.getAllItemsByOwnerId(userDto1.getId()).size());
-        assertEquals(1, itemService.getAllItemsByOwnerId(userDto1.getId()).get(0).getId());
+        assertEquals(1, itemService.getAllItemsByOwnerId(actualUserDto1.getId()).size());
+        assertEquals(1, itemService.getAllItemsByOwnerId(actualUserDto1.getId()).get(0).getId());
     }
 
     @Test
@@ -78,38 +78,38 @@ class ItemServiceImplIntegrationTest {
         ItemDto itemDto2 = itemMapper.itemToItemDto(generator.nextObject(Item.class));
         itemDto2.setName("New Name");
 
-        assertEquals("New Name", itemService.updateItem(itemDto2, userDto1.getId(), itemDto.getId()).getName());
+        assertEquals("New Name", itemService.updateItem(itemDto2, actualUserDto1.getId(), actualItemDto.getId()).getName());
     }
 
     @Test
     @DirtiesContext
     void getItemById() {
-        assertEquals(1, itemService.getItemById(itemDto.getId(), userDto1.getId()).getId());
+        assertEquals(1, itemService.getItemById(actualItemDto.getId(), actualUserDto1.getId()).getId());
     }
 
     @Test
     @DirtiesContext
     void searchItems() {
-        assertEquals(1, itemService.searchItems(itemDto.getName()).size());
-        assertEquals(1, itemService.searchItems(itemDto.getName()).get(0).getId());
+        assertEquals(1, itemService.searchItems(actualItemDto.getName()).size());
+        assertEquals(1, itemService.searchItems(actualItemDto.getName()).get(0).getId());
     }
 
     @Test
     @DirtiesContext
     void addComment() {
         CommentDto commentDto = generator.nextObject(CommentDto.class);
-        commentDto.setItem(itemMapper.itemDtoToItem(itemDto));
+        commentDto.setItem(itemMapper.itemDtoToItem(actualItemDto));
 
         Booking booking = generator.nextObject(Booking.class);
         BookingDto bookingDto = bookingMapper.bookingToBookingDto(booking);
-        bookingDto.setItemId(itemDto.getId());
-        bookingDto.setBookerId(userDto2.getId());
+        bookingDto.setItemId(actualItemDto.getId());
+        bookingDto.setBookerId(actualUserDto2.getId());
         bookingDto.setStart(LocalDateTime.now().minusDays(2));
         bookingDto.setEnd(LocalDateTime.now().minusDays(1));
-        BookingDto actualBookingDto = bookingService.addBooking(bookingDto, userDto2.getId());
-        bookingService.changeStatus(actualBookingDto.getId(), true, userDto1.getId());
+        BookingDto actualBookingDto = bookingService.addBooking(bookingDto, actualUserDto2.getId());
+        bookingService.changeStatus(actualBookingDto.getId(), true, actualUserDto1.getId());
 
         assertEquals(commentDto.getText(),
-                itemService.addComment(commentDto, userDto2.getId(), itemDto.getId()).getText());
+                itemService.addComment(commentDto, actualUserDto2.getId(), actualItemDto.getId()).getText());
     }
 }

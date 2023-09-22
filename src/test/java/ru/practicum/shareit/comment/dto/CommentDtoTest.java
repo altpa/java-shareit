@@ -36,25 +36,25 @@ class CommentDtoTest {
     @Autowired
     private JacksonTester<CommentDto> tester;
 
-    private CommentDto commentDto;
+    private CommentDto createdCommentDto;
 
     @BeforeEach
     public void setUp() {
-        commentDto = new CommentDto();
-        commentDto.setId(ID);
-        commentDto.setText(TEXT);
-        commentDto.setAuthorName(AUTHOR_NAME);
-        commentDto.setCreated(LocalDateTime.parse(NOW));
+        createdCommentDto = new CommentDto();
+        createdCommentDto.setId(ID);
+        createdCommentDto.setText(TEXT);
+        createdCommentDto.setAuthorName(AUTHOR_NAME);
+        createdCommentDto.setCreated(LocalDateTime.parse(NOW));
     }
 
     @Test
     void commentDtoSerializes() throws IOException {
-        JsonContent<CommentDto> result = tester.write(commentDto);
+        JsonContent<CommentDto> result = tester.write(createdCommentDto);
 
         assertThat(result).extractingJsonPathStringValue("$.text").isEqualTo(TEXT);
 
         assertThat(result).extractingJsonPathStringValue("$.created")
-                .isEqualTo(commentDto.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+                .isEqualTo(createdCommentDto.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
     }
 
     @Test

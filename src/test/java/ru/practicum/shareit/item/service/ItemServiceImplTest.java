@@ -8,6 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Streamable;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.LastOrNextBooking;
@@ -46,6 +50,8 @@ class ItemServiceImplTest {
     private static final CommentMapper commentMapper = CommentMapper.INSTANCE;
 
     private static final EasyRandom generator = new EasyRandom();
+    private static final int PAGE = 0;
+    private static final int SIZE = 10;
 
     @Mock
     private UserRepository userRepository;
@@ -62,41 +68,46 @@ class ItemServiceImplTest {
     @InjectMocks
     private ItemServiceImpl itemService;
 
-    private User user1;
-    private User user2;
-    private Item item1;
-    private Item item2;
-    private Comment comment1;
-    private Booking booking1;
-    private LastOrNextBooking lastOrNextBooking1;
-    private LastOrNextBooking lastOrNextBooking2;
+    private User createdUser1;
+    private User createdUser2;
+    private Item createdItem1;
+    private Comment createdComment1;
+    private Booking createdBooking1;
+    private LastOrNextBooking createdLastOrNextBooking1;
+    private LastOrNextBooking createdLastOrNextBooking2;
+    private Page<Item> page;
+    private Page<Item> emptyPage;
 
     @BeforeEach
     public void setUp() {
-        user1 = generator.nextObject(User.class);
-        user2 = generator.nextObject(User.class);
+        createdUser1 = generator.nextObject(User.class);
+        createdUser2 = generator.nextObject(User.class);
 
-        item1 = generator.nextObject(Item.class);
-        item2 = generator.nextObject(Item.class);
-        item1.setOwner(user1);
+        createdItem1 = generator.nextObject(Item.class);
+        createdItem1.setOwner(createdUser1);
 
-        booking1 = generator.nextObject(Booking.class);
+        createdBooking1 = generator.nextObject(Booking.class);
 
-        lastOrNextBooking1 = generator.nextObject(LastOrNextBooking.class);
-        lastOrNextBooking2 = generator.nextObject(LastOrNextBooking.class);
+        createdLastOrNextBooking1 = generator.nextObject(LastOrNextBooking.class);
+        createdLastOrNextBooking2 = generator.nextObject(LastOrNextBooking.class);
 
-        comment1 = generator.nextObject(Comment.class);
+        createdComment1 = generator.nextObject(Comment.class);
+
+        Pageable pageable = PageRequest.of(PAGE, SIZE);
+        page = new PageImpl<>(List.of(createdItem1), pageable, SIZE);
+        emptyPage = new PageImpl<>(Collections.emptyList(), pageable, SIZE);
+
     }
 
     @Test
     void addItem() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
-        when(itemRepository.save(any())).thenReturn(item1);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(createdUser1));
+        when(itemRepository.save(any())).thenReturn(createdItem1);
 
         ItemDto itemDto1 =
-                itemService.addItem(itemMapper.itemToItemDto(item1), user1.getId(), true);
+                itemService.addItem(itemMapper.itemToItemDto(createdItem1), createdUser1.getId(), true);
 
-        assertEquals(itemDto1.getId(), item1.getId());
+        assertEquals(itemDto1.getId(), createdItem1.getId());
     }
 
     @Test
@@ -105,293 +116,293 @@ class ItemServiceImplTest {
 
         assertThrows(ObjectNotFoundException.class, () -> {
             ItemDto itemDto1 =
-                    itemService.addItem(itemMapper.itemToItemDto(item1), user1.getId(), true);
+                    itemService.addItem(itemMapper.itemToItemDto(createdItem1), createdUser1.getId(), true);
         });
     }
 
     @Test
     void getAllItemsByOwnerIdWhenNoComments() {
-        when(itemRepository.findByOwnerId(anyLong()))
-                .thenReturn(Streamable.of(List.of(item1)));
+        when(itemRepository.findByOwnerId(anyLong(), any(Pageable.class)))
+                .thenReturn(page);
         when(commentRepository.findByItemId(anyLong()))
                 .thenThrow(new InvalidDataAccessResourceUsageException("no comments"));
 
         assertThrows(ObjectNotFoundException.class, () -> {
             List<ItemDto> itemsDto =
-                    itemService.getAllItemsByOwnerId(user1.getId());
+                    itemService.getAllItemsByOwnerId(createdUser1.getId());
         });
     }
 
     @Test
     void getAllItemsByOwnerIdWhenLastAndNextBooking() {
-        item1.setOwner(user1);
-        when(itemRepository.findByOwnerId(anyLong()))
-                .thenReturn(Streamable.of(List.of(item1)));
+        createdItem1.setOwner(createdUser1);
+        when(itemRepository.findByOwnerId(anyLong(), any(Pageable.class)))
+                .thenReturn(page);
         when(commentRepository.findByItemId(anyLong()))
-                .thenReturn(Streamable.of(List.of(comment1)));
+                .thenReturn(Streamable.of(List.of(createdComment1)));
 
-        lastOrNextBooking1.setStart(LocalDateTime.now().minusDays(2));
-        lastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(1));
-        lastOrNextBooking1.setStatus(APPROVED);
-        lastOrNextBooking2.setStart(LocalDateTime.now().plusDays(1));
-        lastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(2));
-        lastOrNextBooking2.setStatus(APPROVED);
+        createdLastOrNextBooking1.setStart(LocalDateTime.now().minusDays(2));
+        createdLastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(1));
+        createdLastOrNextBooking1.setStatus(APPROVED);
+        createdLastOrNextBooking2.setStart(LocalDateTime.now().plusDays(1));
+        createdLastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(2));
+        createdLastOrNextBooking2.setStatus(APPROVED);
 
         when(bookingRepository.findByItemIdOrderByStartAsc(anyLong()))
-                .thenReturn(Streamable.of(List.of(lastOrNextBooking1, lastOrNextBooking2)));
+                .thenReturn(Streamable.of(List.of(createdLastOrNextBooking1, createdLastOrNextBooking2)));
 
-        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(user1.getId());
+        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(createdUser1.getId());
         assertEquals(1, itemsDto.size());
-        assertEquals(itemsDto.get(0).getId(), item1.getId());
-        assertEquals(itemsDto.get(0).getLastBooking().getId(), lastOrNextBooking1.getId());
-        assertEquals(itemsDto.get(0).getNextBooking().getId(), lastOrNextBooking2.getId());
+        assertEquals(itemsDto.get(0).getId(), createdItem1.getId());
+        assertEquals(itemsDto.get(0).getLastBooking().getId(), createdLastOrNextBooking1.getId());
+        assertEquals(itemsDto.get(0).getNextBooking().getId(), createdLastOrNextBooking2.getId());
     }
 
     @Test
     void getAllItemsByOwnerIdWhenOwnerIsNotOwner() {
-        item1.setOwner(user1);
-        when(itemRepository.findByOwnerId(anyLong()))
-                .thenReturn(Streamable.of(List.of(item1)));
+        createdItem1.setOwner(createdUser1);
+        when(itemRepository.findByOwnerId(anyLong(), any(Pageable.class)))
+                .thenReturn(page);
         when(commentRepository.findByItemId(anyLong()))
-                .thenReturn(Streamable.of(List.of(comment1)));
+                .thenReturn(Streamable.of(List.of(createdComment1)));
 
-        lastOrNextBooking1.setStart(LocalDateTime.now().minusDays(2));
-        lastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(1));
-        lastOrNextBooking1.setStatus(APPROVED);
-        lastOrNextBooking2.setStart(LocalDateTime.now().plusDays(1));
-        lastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(2));
-        lastOrNextBooking2.setStatus(APPROVED);
+        createdLastOrNextBooking1.setStart(LocalDateTime.now().minusDays(2));
+        createdLastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(1));
+        createdLastOrNextBooking1.setStatus(APPROVED);
+        createdLastOrNextBooking2.setStart(LocalDateTime.now().plusDays(1));
+        createdLastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(2));
+        createdLastOrNextBooking2.setStatus(APPROVED);
 
         when(bookingRepository.findByItemIdOrderByStartAsc(anyLong()))
-                .thenReturn(Streamable.of(List.of(lastOrNextBooking1, lastOrNextBooking2)));
+                .thenReturn(Streamable.of(List.of(createdLastOrNextBooking1, createdLastOrNextBooking2)));
 
-        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(user2.getId());
+        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(createdUser2.getId());
         assertEquals(1, itemsDto.size());
-        assertEquals(itemsDto.get(0).getId(), item1.getId());
+        assertEquals(itemsDto.get(0).getId(), createdItem1.getId());
         assertNull(itemsDto.get(0).getNextBooking());
         assertNull(itemsDto.get(0).getLastBooking());
     }
 
     @Test
     void getAllItemsByOwnerIdWhenNotApproved() {
-        item1.setOwner(user1);
-        when(itemRepository.findByOwnerId(anyLong()))
-                .thenReturn(Streamable.of(List.of(item1)));
+        createdItem1.setOwner(createdUser1);
+        when(itemRepository.findByOwnerId(anyLong(), any(Pageable.class)))
+                .thenReturn(page);
         when(commentRepository.findByItemId(anyLong()))
-                .thenReturn(Streamable.of(List.of(comment1)));
+                .thenReturn(Streamable.of(List.of(createdComment1)));
 
-        lastOrNextBooking1.setStart(LocalDateTime.now().minusDays(2));
-        lastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(1));
-        lastOrNextBooking1.setStatus(WAITING);
-        lastOrNextBooking2.setStart(LocalDateTime.now().plusDays(1));
-        lastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(2));
-        lastOrNextBooking2.setStatus(WAITING);
+        createdLastOrNextBooking1.setStart(LocalDateTime.now().minusDays(2));
+        createdLastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(1));
+        createdLastOrNextBooking1.setStatus(WAITING);
+        createdLastOrNextBooking2.setStart(LocalDateTime.now().plusDays(1));
+        createdLastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(2));
+        createdLastOrNextBooking2.setStatus(WAITING);
 
         when(bookingRepository.findByItemIdOrderByStartAsc(anyLong()))
-                .thenReturn(Streamable.of(List.of(lastOrNextBooking1, lastOrNextBooking2)));
+                .thenReturn(Streamable.of(List.of(createdLastOrNextBooking1, createdLastOrNextBooking2)));
 
-        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(user1.getId());
+        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(createdUser1.getId());
         assertEquals(1, itemsDto.size());
-        assertEquals(itemsDto.get(0).getId(), item1.getId());
+        assertEquals(itemsDto.get(0).getId(), createdItem1.getId());
         assertNull(itemsDto.get(0).getNextBooking());
         assertNull(itemsDto.get(0).getLastBooking());
     }
 
     @Test
     void getAllItemsByOwnerIdWhenNoBooking() {
-        item1.setOwner(user1);
-        when(itemRepository.findByOwnerId(anyLong()))
-                .thenReturn(Streamable.of(List.of(item1)));
+        createdItem1.setOwner(createdUser1);
+        when(itemRepository.findByOwnerId(anyLong(), any(Pageable.class)))
+                .thenReturn(page);
         when(commentRepository.findByItemId(anyLong()))
-                .thenReturn(Streamable.of(List.of(comment1)));
+                .thenReturn(Streamable.of(List.of(createdComment1)));
 
-        lastOrNextBooking1.setStart(LocalDateTime.now().minusDays(2));
-        lastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(1));
-        lastOrNextBooking1.setStatus(WAITING);
-        lastOrNextBooking2.setStart(LocalDateTime.now().plusDays(1));
-        lastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(2));
-        lastOrNextBooking2.setStatus(WAITING);
+        createdLastOrNextBooking1.setStart(LocalDateTime.now().minusDays(2));
+        createdLastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(1));
+        createdLastOrNextBooking1.setStatus(WAITING);
+        createdLastOrNextBooking2.setStart(LocalDateTime.now().plusDays(1));
+        createdLastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(2));
+        createdLastOrNextBooking2.setStatus(WAITING);
 
         when(bookingRepository.findByItemIdOrderByStartAsc(anyLong()))
                 .thenReturn(Streamable.of(Collections.emptyList()));
 
-        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(user1.getId());
+        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(createdUser1.getId());
         assertEquals(1, itemsDto.size());
-        assertEquals(itemsDto.get(0).getId(), item1.getId());
+        assertEquals(itemsDto.get(0).getId(), createdItem1.getId());
         assertNull(itemsDto.get(0).getNextBooking());
         assertNull(itemsDto.get(0).getLastBooking());
     }
 
     @Test
     void getAllItemsByOwnerIdWhenOnlyLastBooking() {
-        item1.setOwner(user1);
-        when(itemRepository.findByOwnerId(anyLong()))
-                .thenReturn(Streamable.of(List.of(item1)));
+        createdItem1.setOwner(createdUser1);
+        when(itemRepository.findByOwnerId(anyLong(), any(Pageable.class)))
+                .thenReturn(page);
         when(commentRepository.findByItemId(anyLong()))
-                .thenReturn(Streamable.of(List.of(comment1)));
+                .thenReturn(Streamable.of(List.of(createdComment1)));
 
-        lastOrNextBooking1.setStart(LocalDateTime.now().minusDays(4));
-        lastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(3));
-        lastOrNextBooking1.setStatus(APPROVED);
-        lastOrNextBooking2.setStart(LocalDateTime.now().minusDays(2));
-        lastOrNextBooking2.setEnd(LocalDateTime.now().minusDays(1));
-        lastOrNextBooking2.setStatus(APPROVED);
+        createdLastOrNextBooking1.setStart(LocalDateTime.now().minusDays(4));
+        createdLastOrNextBooking1.setEnd(LocalDateTime.now().minusDays(3));
+        createdLastOrNextBooking1.setStatus(APPROVED);
+        createdLastOrNextBooking2.setStart(LocalDateTime.now().minusDays(2));
+        createdLastOrNextBooking2.setEnd(LocalDateTime.now().minusDays(1));
+        createdLastOrNextBooking2.setStatus(APPROVED);
 
         when(bookingRepository.findByItemIdOrderByStartAsc(anyLong()))
-                .thenReturn(Streamable.of(List.of(lastOrNextBooking1, lastOrNextBooking2)));
+                .thenReturn(Streamable.of(List.of(createdLastOrNextBooking1, createdLastOrNextBooking2)));
 
-        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(user1.getId());
+        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(createdUser1.getId());
         assertEquals(1, itemsDto.size());
-        assertEquals(itemsDto.get(0).getId(), item1.getId());
-        assertEquals(itemsDto.get(0).getLastBooking().getId(), lastOrNextBooking2.getId());
+        assertEquals(itemsDto.get(0).getId(), createdItem1.getId());
+        assertEquals(itemsDto.get(0).getLastBooking().getId(), createdLastOrNextBooking2.getId());
         assertNull(itemsDto.get(0).getNextBooking());
     }
 
     @Test
     void getAllItemsByOwnerIdWhenOnlyNextBooking() {
-        item1.setOwner(user1);
-        when(itemRepository.findByOwnerId(anyLong()))
-                .thenReturn(Streamable.of(List.of(item1)));
+        createdItem1.setOwner(createdUser1);
+        when(itemRepository.findByOwnerId(anyLong(), any(Pageable.class)))
+                .thenReturn(page);
         when(commentRepository.findByItemId(anyLong()))
-                .thenReturn(Streamable.of(List.of(comment1)));
+                .thenReturn(Streamable.of(List.of(createdComment1)));
 
-        lastOrNextBooking1.setStart(LocalDateTime.now().plusDays(1));
-        lastOrNextBooking1.setEnd(LocalDateTime.now().plusDays(2));
-        lastOrNextBooking1.setStatus(APPROVED);
-        lastOrNextBooking2.setStart(LocalDateTime.now().plusDays(3));
-        lastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(4));
-        lastOrNextBooking2.setStatus(APPROVED);
+        createdLastOrNextBooking1.setStart(LocalDateTime.now().plusDays(1));
+        createdLastOrNextBooking1.setEnd(LocalDateTime.now().plusDays(2));
+        createdLastOrNextBooking1.setStatus(APPROVED);
+        createdLastOrNextBooking2.setStart(LocalDateTime.now().plusDays(3));
+        createdLastOrNextBooking2.setEnd(LocalDateTime.now().plusDays(4));
+        createdLastOrNextBooking2.setStatus(APPROVED);
 
         when(bookingRepository.findByItemIdOrderByStartAsc(anyLong()))
-                .thenReturn(Streamable.of(List.of(lastOrNextBooking2, lastOrNextBooking1)));
+                .thenReturn(Streamable.of(List.of(createdLastOrNextBooking2, createdLastOrNextBooking1)));
 
-        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(user1.getId());
+        List<ItemDto> itemsDto = itemService.getAllItemsByOwnerId(createdUser1.getId());
         assertEquals(1, itemsDto.size());
-        assertEquals(itemsDto.get(0).getNextBooking().getId(), lastOrNextBooking1.getId());
+        assertEquals(itemsDto.get(0).getNextBooking().getId(), createdLastOrNextBooking1.getId());
         assertNull(itemsDto.get(0).getLastBooking());
     }
 
     @Test
     void addComment() {
-        CommentDto commentDto = commentMapper.commentToCommentDto(comment1);
+        CommentDto commentDto = commentMapper.commentToCommentDto(createdComment1);
 
         when(bookingRepository
                 .findByItemIdAndBookerIdAndStatusAndEndBefore(anyLong(), anyLong(), any(), any()))
-                .thenReturn(Optional.of(List.of(booking1)));
+                .thenReturn(Optional.of(List.of(createdBooking1)));
 
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createdItem1));
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(createdUser1));
 
-        when(commentRepository.save(any())).thenReturn(comment1);
+        when(commentRepository.save(any())).thenReturn(createdComment1);
 
-        CommentDto answer = itemService.addComment(commentDto, user1.getId(), item1.getId());
+        CommentDto answer = itemService.addComment(commentDto, createdUser1.getId(), createdItem1.getId());
 
         assertEquals(answer.getText(), commentDto.getText());
     }
 
     @Test
     void addCommentWhenNotBooked() {
-        CommentDto commentDto = commentMapper.commentToCommentDto(comment1);
+        CommentDto commentDto = commentMapper.commentToCommentDto(createdComment1);
 
         when(bookingRepository
                 .findByItemIdAndBookerIdAndStatusAndEndBefore(anyLong(), anyLong(), any(), any()))
                 .thenReturn(Optional.of(Collections.emptyList()));
 
         assertThrows(BadRequestException.class, () -> {
-            CommentDto answer = itemService.addComment(commentDto, user1.getId(), item1.getId());
+            CommentDto answer = itemService.addComment(commentDto, createdUser1.getId(), createdItem1.getId());
         });
     }
 
     @Test
     void addCommentWhenItemNotFound() {
-        CommentDto commentDto = commentMapper.commentToCommentDto(comment1);
+        CommentDto commentDto = commentMapper.commentToCommentDto(createdComment1);
 
         when(bookingRepository
                 .findByItemIdAndBookerIdAndStatusAndEndBefore(anyLong(), anyLong(), any(), any()))
-                .thenReturn(Optional.of(List.of(booking1)));
+                .thenReturn(Optional.of(List.of(createdBooking1)));
 
         when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(ObjectNotFoundException.class, () -> {
-            CommentDto answer = itemService.addComment(commentDto, user1.getId(), item1.getId());
+            CommentDto answer = itemService.addComment(commentDto, createdUser1.getId(), createdItem1.getId());
         });
     }
 
     @Test
     void addCommentWhenUserNotFound() {
-        CommentDto commentDto = commentMapper.commentToCommentDto(comment1);
+        CommentDto commentDto = commentMapper.commentToCommentDto(createdComment1);
 
         when(bookingRepository
                 .findByItemIdAndBookerIdAndStatusAndEndBefore(anyLong(), anyLong(), any(), any()))
-                .thenReturn(Optional.of(List.of(booking1)));
+                .thenReturn(Optional.of(List.of(createdBooking1)));
 
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createdItem1));
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(ObjectNotFoundException.class, () -> {
-            CommentDto answer = itemService.addComment(commentDto, user1.getId(), item1.getId());
+            CommentDto answer = itemService.addComment(commentDto, createdUser1.getId(), createdItem1.getId());
         });
     }
 
     @Test
     void updateItem() {
-        item1.setOwner(user1);
-        ItemDto itemDto = itemMapper.itemToItemDto(item1);
+        createdItem1.setOwner(createdUser1);
+        ItemDto itemDto = itemMapper.itemToItemDto(createdItem1);
 
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createdItem1));
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user1));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(createdUser1));
 
-        when(itemRepository.save(any())).thenReturn(item1);
+        when(itemRepository.save(any())).thenReturn(createdItem1);
 
-        ItemDto answer = itemService.updateItem(itemDto, user1.getId(), item1.getId());
+        ItemDto answer = itemService.updateItem(itemDto, createdUser1.getId(), createdItem1.getId());
 
-        assertEquals(item1.getId(), answer.getId());
+        assertEquals(createdItem1.getId(), answer.getId());
     }
 
     @Test
     void updateItemWhenNoItem() {
-        item1.setOwner(user1);
-        ItemDto itemDto = itemMapper.itemToItemDto(item1);
+        createdItem1.setOwner(createdUser1);
+        ItemDto itemDto = itemMapper.itemToItemDto(createdItem1);
 
         when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(ObjectsDbException.class, () -> {
-            ItemDto answer = itemService.updateItem(itemDto, user1.getId(), item1.getId());
+            ItemDto answer = itemService.updateItem(itemDto, createdUser1.getId(), createdItem1.getId());
         });
     }
 
     @Test
     void updateItemWhenNotOwner() {
-        item1.setOwner(user2);
-        ItemDto itemDto = itemMapper.itemToItemDto(item1);
+        createdItem1.setOwner(createdUser2);
+        ItemDto itemDto = itemMapper.itemToItemDto(createdItem1);
 
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createdItem1));
 
         assertThrows(ObjectsDbException.class, () -> {
-            ItemDto answer = itemService.updateItem(itemDto, user1.getId(), item1.getId());
+            ItemDto answer = itemService.updateItem(itemDto, createdUser1.getId(), createdItem1.getId());
         });
     }
 
     @Test
     void updateItemWhenOwnerNotFound() {
-        item1.setOwner(user1);
-        ItemDto itemDto = itemMapper.itemToItemDto(item1);
+        createdItem1.setOwner(createdUser1);
+        ItemDto itemDto = itemMapper.itemToItemDto(createdItem1);
 
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createdItem1));
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(ObjectNotFoundException.class, () -> {
-            ItemDto answer = itemService.updateItem(itemDto, user1.getId(), item1.getId());
+            ItemDto answer = itemService.updateItem(itemDto, createdUser1.getId(), createdItem1.getId());
         });
     }
 
     @Test
     void getItemById() {
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item1));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createdItem1));
 
         when(commentRepository.findByItemId(anyLong()))
                 .thenReturn(Streamable.of(Collections.emptyList()));
@@ -399,9 +410,9 @@ class ItemServiceImplTest {
         when(bookingRepository.findByItemIdOrderByStartAsc(anyLong()))
                 .thenReturn(Streamable.of(Collections.emptyList()));
 
-        ItemDto answer = itemService.getItemById(item1.getId(), item1.getOwner().getId());
+        ItemDto answer = itemService.getItemById(createdItem1.getId(), createdItem1.getOwner().getId());
 
-        assertEquals(answer.getId(), item1.getId());
+        assertEquals(answer.getId(), createdItem1.getId());
     }
 
     @Test
@@ -409,34 +420,34 @@ class ItemServiceImplTest {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(ObjectNotFoundException.class, () -> {
-            ItemDto answer = itemService.getItemById(item1.getId(), item1.getOwner().getId());
+            ItemDto answer = itemService.getItemById(createdItem1.getId(), createdItem1.getOwner().getId());
         });
     }
 
     @Test
     void searchItems() {
-        item1.setName("Name");
+        createdItem1.setName("Name");
 
         when(itemRepository
                 .findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
-                        any(String.class), any(String.class)))
-                .thenReturn(Streamable.of(List.of(item1)));
+                        any(String.class), any(String.class), any(Pageable.class)))
+                .thenReturn(page);
 
         List<ItemDto> itemsDto = itemService.searchItems("Name");
 
         assertEquals(1, itemsDto.size());
-        assertEquals(itemsDto.get(0).getName(), item1.getName());
+        assertEquals(itemsDto.get(0).getName(), createdItem1.getName());
     }
 
     @Test
     void searchItemsWhenNotFound() {
         when(itemRepository
                 .findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
-                        any(String.class), any(String.class)))
-                .thenReturn(Streamable.empty());
+                        any(String.class), any(String.class), any(Pageable.class)))
+                .thenReturn(emptyPage);
 
         List<ItemDto> itemsDto = itemService.searchItems("Name");
-
+        System.out.println(itemsDto);
         assertEquals(0, itemsDto.size());
     }
 

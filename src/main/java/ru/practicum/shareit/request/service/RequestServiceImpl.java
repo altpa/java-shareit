@@ -23,10 +23,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
+    private static final RequestMapper mapper = RequestMapper.INSTANCE;
     private final RequestRepository requestRepository;
     private final ItemRepository itemRepository;
     private final UserService userService;
-    private static final RequestMapper mapper = RequestMapper.INSTANCE;
 
     @Override
     public RequestsDto save(RequestsDto requestsDto, long ownerId) {

@@ -18,17 +18,17 @@ class UserServiceImplIntegrationTest {
     @Autowired
     private UserService userService;
 
-    private UserDto userDto;
+    private UserDto actualUserDto;
 
     @BeforeEach
     public void setUp() {
-        userDto = userService.addUser(generator.nextObject(UserDto.class));
+        actualUserDto = userService.addUser(generator.nextObject(UserDto.class));
     }
 
     @Test
     @DirtiesContext
     void addUser() {
-        assertEquals(1, userDto.getId());
+        assertEquals(1, actualUserDto.getId());
     }
 
     @Test
@@ -40,29 +40,29 @@ class UserServiceImplIntegrationTest {
     @Test
     @DirtiesContext
     void updateUser() {
-        userDto = generator.nextObject(UserDto.class);
-        userDto.setName("New Name");
+        actualUserDto = generator.nextObject(UserDto.class);
+        actualUserDto.setName("New Name");
 
-        userDto = userService.updateUser(userDto, 1);
-        assertEquals("New Name", userDto.getName());
+        actualUserDto = userService.updateUser(actualUserDto, 1);
+        assertEquals("New Name", actualUserDto.getName());
     }
 
     @Test
     @DirtiesContext
     void getUserById() {
-        assertEquals(1, userService.getUserById(userDto.getId()).getId());
+        assertEquals(1, userService.getUserById(actualUserDto.getId()).getId());
     }
 
     @Test
     @DirtiesContext
     void deleteUser() {
-        userService.deleteUser(userDto.getId());
+        userService.deleteUser(actualUserDto.getId());
         assertEquals(0, userService.getAllUsers().size());
     }
 
     @Test
     @DirtiesContext
     void checkOwner() {
-        assertTrue(userService.checkOwner(userDto.getId()));
+        assertTrue(userService.checkOwner(actualUserDto.getId()));
     }
 }

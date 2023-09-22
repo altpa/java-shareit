@@ -39,7 +39,7 @@ class UserControllerTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
-    private UserDto userDto1;
+    private UserDto createdUserDto1;
 
     @BeforeEach
     public void setUp() {
@@ -47,8 +47,8 @@ class UserControllerTest {
                 .standaloneSetup(controller)
                 .build();
 
-        userDto1 = generator.nextObject(UserDto.class);
-        userDto1.setEmail("email@mail.com");
+        createdUserDto1 = generator.nextObject(UserDto.class);
+        createdUserDto1.setEmail("email@mail.com");
     }
 
     @Test
@@ -56,7 +56,7 @@ class UserControllerTest {
 
         when(userService.getAllUsers())
                 .thenAnswer(invocationOnMock -> {
-                    return List.of(userDto1);
+                    return List.of(createdUserDto1);
                 });
 
         mvc.perform(get("/users"))
@@ -68,36 +68,36 @@ class UserControllerTest {
 
         when(userService.getUserById(anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return userDto1;
+                    return createdUserDto1;
                 });
 
         mvc.perform(get("/users/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userDto1.getId()));
+                .andExpect(jsonPath("$.id").value(createdUserDto1.getId()));
     }
 
     @Test
     void addUser() throws Exception {
         when(userService.addUser(any(UserDto.class)))
                 .thenAnswer(invocationOnMock -> {
-                    return userDto1;
+                    return createdUserDto1;
                 });
 
         mvc.perform(post("/users")
-                        .content(mapper.writeValueAsString(userDto1))
+                        .content(mapper.writeValueAsString(createdUserDto1))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userDto1.getId()));
+                .andExpect(jsonPath("$.id").value(createdUserDto1.getId()));
     }
 
     @Test
     void addUserWhenEmailBlank() throws Exception {
-        userDto1.setEmail("");
+        createdUserDto1.setEmail("");
 
         mvc.perform(post("/users")
-                        .content(mapper.writeValueAsString(userDto1))
+                        .content(mapper.writeValueAsString(createdUserDto1))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
@@ -106,10 +106,10 @@ class UserControllerTest {
 
     @Test
     void addUserWhenEmailFail() throws Exception {
-        userDto1.setEmail("mail");
+        createdUserDto1.setEmail("mail");
 
         mvc.perform(post("/users")
-                        .content(mapper.writeValueAsString(userDto1))
+                        .content(mapper.writeValueAsString(createdUserDto1))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
@@ -118,37 +118,37 @@ class UserControllerTest {
 
     @Test
     void updateUser() throws Exception {
-        userDto1.setId(1);
-        userDto1.setName("New Name");
+        createdUserDto1.setId(1);
+        createdUserDto1.setName("New Name");
 
         when(userService.updateUser(any(UserDto.class), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return userDto1;
+                    return createdUserDto1;
                 });
 
-        mvc.perform(patch("/users/{userId}", String.valueOf(userDto1.getId()))
-                        .content(mapper.writeValueAsString(userDto1))
+        mvc.perform(patch("/users/{userId}", String.valueOf(createdUserDto1.getId()))
+                        .content(mapper.writeValueAsString(createdUserDto1))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(userDto1.getName()));
+                .andExpect(jsonPath("$.name").value(createdUserDto1.getName()));
     }
 
     @Test
     void deleteUser() throws Exception {
 
-        userDto1.setId(1);
+        createdUserDto1.setId(1);
         when(userService.deleteUser(anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return userDto1;
+                    return createdUserDto1;
                 });
 
-        mvc.perform(delete("/users/{userId}", String.valueOf(userDto1.getId()))
+        mvc.perform(delete("/users/{userId}", String.valueOf(createdUserDto1.getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userDto1.getId()));
+                .andExpect(jsonPath("$.id").value(createdUserDto1.getId()));
     }
 }

@@ -60,7 +60,7 @@ public class BookingController {
                                         @RequestParam(name = "from", defaultValue = "0") @Min(0) int from,
                                         @RequestParam(name = "size", defaultValue = "10") @Min(1) int size) {
         log.info("+BookingController - getByUserIdAndState: userId = " + userId +  ", state = " + state);
-        List<BookingDto> answer =  bookingService.getByUserIdAndStateByBooker(userId, state, from, size);
+        List<BookingDto> answer = bookingService.getByUserIdAndStateByBooker(userId, state, from, size);
 
         log.info("+BookingController - getByUserIdAndState: answer = " + answer);
         return answer;

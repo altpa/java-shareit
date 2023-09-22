@@ -41,37 +41,37 @@ class BookingServiceImplIntegrationTest {
     @Autowired
     private ItemServiceImpl itemService;
 
-    private UserDto userDto1;
-    private UserDto userDto2;
-    private BookingDto bookingDto1;
+    private UserDto actualUserDto1;
+    private UserDto actualUserDto2;
+    private BookingDto createdBookingDto1;
 
     @BeforeEach
     public void setUp() {
-        User user1 = generator.nextObject(User.class);
-        User user2 = generator.nextObject(User.class);
-        userDto1 = userService.addUser(userMapper.userToUserDto(user1));
-        userDto2 = userService.addUser(userMapper.userToUserDto(user2));
+        User createdUser1 = generator.nextObject(User.class);
+        User createdUser2 = generator.nextObject(User.class);
+        actualUserDto1 = userService.addUser(userMapper.userToUserDto(createdUser1));
+        actualUserDto2 = userService.addUser(userMapper.userToUserDto(createdUser2));
 
         Item item1 = generator.nextObject(Item.class);
         item1.setAvailable(true);
         ItemDto itemDto1 = itemService
-                .addItem(itemMapper.itemToItemDto(item1), userDto1.getId(),
-                        userService.checkOwner(userDto1.getId()));
-        itemDto1.setOwner(userMapper.userDtoToUser(userDto1));
+                .addItem(itemMapper.itemToItemDto(item1), actualUserDto1.getId(),
+                        userService.checkOwner(actualUserDto1.getId()));
+        itemDto1.setOwner(userMapper.userDtoToUser(actualUserDto1));
 
-        Booking booking1 = generator.nextObject(Booking.class);
-        bookingDto1 = bookingMapper.bookingToBookingDto(booking1);
-        bookingDto1.setItem(itemMapper.itemDtoToItem(itemDto1));
-        bookingDto1.setStart(LocalDateTime.now().plusDays(1));
-        bookingDto1.setEnd(LocalDateTime.now().plusDays(2));
-        bookingDto1.setItemId(itemDto1.getId());
+        Booking createdBooking1 = generator.nextObject(Booking.class);
+        createdBookingDto1 = bookingMapper.bookingToBookingDto(createdBooking1);
+        createdBookingDto1.setItem(itemMapper.itemDtoToItem(itemDto1));
+        createdBookingDto1.setStart(LocalDateTime.now().plusDays(1));
+        createdBookingDto1.setEnd(LocalDateTime.now().plusDays(2));
+        createdBookingDto1.setItemId(itemDto1.getId());
     }
 
     @Test
     @DirtiesContext
     void addBooking() {
         BookingDto bookingDto =
-                bookingService.addBooking(bookingDto1, userDto2.getId());
+                bookingService.addBooking(createdBookingDto1, actualUserDto2.getId());
 
         assertEquals(1, bookingDto.getId());
     }
@@ -79,13 +79,13 @@ class BookingServiceImplIntegrationTest {
     @Test
     @DirtiesContext
     void changeStatus() {
-        bookingDto1.setStatus(WAITING);
+        createdBookingDto1.setStatus(WAITING);
 
         BookingDto bookingDto =
-                bookingService.addBooking(bookingDto1, userDto2.getId());
+                bookingService.addBooking(createdBookingDto1, actualUserDto2.getId());
 
         BookingDto bookingDtoApproved =
-                bookingService.changeStatus(bookingDto.getId(), true, userDto1.getId());
+                bookingService.changeStatus(bookingDto.getId(), true, actualUserDto1.getId());
         assertEquals(APPROVED, bookingDtoApproved.getStatus());
     }
 
@@ -93,23 +93,23 @@ class BookingServiceImplIntegrationTest {
     @DirtiesContext
     void getById() {
         BookingDto bookingDto =
-                bookingService.addBooking(bookingDto1, userDto2.getId());
+                bookingService.addBooking(createdBookingDto1, actualUserDto2.getId());
 
         assertEquals(bookingDto.getId(),
-                bookingService.getById(bookingDto.getId(), userDto1.getId()).getId());
+                bookingService.getById(bookingDto.getId(), actualUserDto1.getId()).getId());
     }
 
     @Test
     @DirtiesContext
     void getByUserIdAndStateByBooker() {
         BookingDto bookingDto =
-                bookingService.addBooking(bookingDto1, userDto2.getId());
+                bookingService.addBooking(createdBookingDto1, actualUserDto2.getId());
 
         int from = 0;
         int size = 10;
 
         List<BookingDto> bookingsDto = bookingService.getByUserIdAndStateByBooker(
-                userDto2.getId(), "ALL", from, size);
+                actualUserDto2.getId(), "ALL", from, size);
 
         assertEquals(1, bookingsDto.size());
         assertEquals(bookingDto.getId(),
@@ -120,13 +120,13 @@ class BookingServiceImplIntegrationTest {
     @DirtiesContext
     void getByUserIdAndStateByOwner() {
         BookingDto bookingDto =
-                bookingService.addBooking(bookingDto1, userDto2.getId());
+                bookingService.addBooking(createdBookingDto1, actualUserDto2.getId());
 
         int from = 0;
         int size = 10;
 
         List<BookingDto> bookingsDto = bookingService.getByUserIdAndStateByOwner(
-                userDto1.getId(), "ALL", from, size);
+                actualUserDto1.getId(), "ALL", from, size);
 
         assertEquals(1, bookingsDto.size());
         assertEquals(bookingDto.getId(),

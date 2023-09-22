@@ -39,7 +39,7 @@ class RequestControllerTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
-    private RequestsDto requestsDto;
+    private RequestsDto createdRequestsDto;
 
 
     @BeforeEach
@@ -48,9 +48,9 @@ class RequestControllerTest {
                 .standaloneSetup(controller)
                 .build();
 
-        requestsDto = new RequestsDto();
-        requestsDto.setDescription("Description");
-        requestsDto.setId(1);
+        createdRequestsDto = new RequestsDto();
+        createdRequestsDto.setDescription("Description");
+        createdRequestsDto.setId(1);
 
         mapper.registerModule(new JavaTimeModule());
     }
@@ -59,73 +59,73 @@ class RequestControllerTest {
     void addRequest() throws Exception {
         when(requestService.save(any(RequestsDto.class), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return requestsDto;
+                    return createdRequestsDto;
                 });
 
         mvc.perform(post("/requests")
-                        .content(mapper.writeValueAsString(requestsDto))
-                        .header("X-Sharer-User-Id", String.valueOf(requestsDto.getOwnerId()))
+                        .content(mapper.writeValueAsString(createdRequestsDto))
+                        .header("X-Sharer-User-Id", String.valueOf(createdRequestsDto.getOwnerId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(requestsDto.getId()));
+                .andExpect(jsonPath("$.id").value(createdRequestsDto.getId()));
 
     }
 
     @Test
     void getOwnRequests() throws Exception {
-        requestsDto.setOwnerId(1);
+        createdRequestsDto.setOwnerId(1);
         when(requestService.getOwnRequests(anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return List.of(requestsDto);
+                    return List.of(createdRequestsDto);
                 });
 
         mvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", String.valueOf(requestsDto.getOwnerId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdRequestsDto.getOwnerId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(requestsDto.getId()));
+                .andExpect(jsonPath("$[0].id").value(createdRequestsDto.getId()));
 
     }
 
     @Test
     void getAllRequest() throws Exception {
-        requestsDto.setOwnerId(1);
+        createdRequestsDto.setOwnerId(1);
         when(requestService.getAllRequest(anyInt(), anyInt(), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return List.of(requestsDto);
+                    return List.of(createdRequestsDto);
                 });
 
         mvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", String.valueOf(requestsDto.getOwnerId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdRequestsDto.getOwnerId()))
                         .param("from", "0")
                         .param("size", "10")
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(requestsDto.getId()));
+                .andExpect(jsonPath("$[0].id").value(createdRequestsDto.getId()));
 
     }
 
     @Test
     void getRequestById() throws Exception {
-        requestsDto.setOwnerId(1);
+        createdRequestsDto.setOwnerId(1);
         when(requestService.getRequestById(anyLong(), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return requestsDto;
+                    return createdRequestsDto;
                 });
 
-        mvc.perform(get("/requests/{requestId}", String.valueOf(requestsDto.getId()))
-                        .header("X-Sharer-User-Id", String.valueOf(requestsDto.getOwnerId()))
+        mvc.perform(get("/requests/{requestId}", String.valueOf(createdRequestsDto.getId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdRequestsDto.getOwnerId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(requestsDto.getId()));
+                .andExpect(jsonPath("$.id").value(createdRequestsDto.getId()));
 
     }
 }

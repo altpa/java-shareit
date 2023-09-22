@@ -29,25 +29,25 @@ class RequestServiceImplIntegrationTest {
     @Autowired
     private ItemService itemService;
 
-    private UserDto userDto;
-    private RequestsDto requestsDto;
+    private UserDto actualUserDto;
+    private RequestsDto actualRequestsDto;
 
     @BeforeEach
     public void setUp() {
-        userDto = userService.addUser(generator.nextObject(UserDto.class));
-        requestsDto = requestService.save(generator.nextObject(RequestsDto.class), userDto.getId());
+        actualUserDto = userService.addUser(generator.nextObject(UserDto.class));
+        actualRequestsDto = requestService.save(generator.nextObject(RequestsDto.class), actualUserDto.getId());
     }
 
     @Test
     @DirtiesContext
     void save() {
-        assertEquals(1, requestsDto.getId());
+        assertEquals(1, actualRequestsDto.getId());
     }
 
     @Test
     @DirtiesContext
     void getOwnRequests() {
-        List<RequestsDto> requestsDto = requestService.getOwnRequests(userDto.getId());
+        List<RequestsDto> requestsDto = requestService.getOwnRequests(actualUserDto.getId());
 
         assertEquals(1, requestsDto.size());
         assertEquals(1, requestsDto.get(0).getId());
@@ -60,10 +60,10 @@ class RequestServiceImplIntegrationTest {
         int size = 10;
 
         ItemDto itemDto = generator.nextObject(ItemDto.class);
-        itemDto.setRequestId(requestsDto.getId());
-        itemService.addItem(itemDto, userDto.getId(), true);
+        itemDto.setRequestId(actualRequestsDto.getId());
+        itemService.addItem(itemDto, actualUserDto.getId(), true);
 
-        List<RequestsDto> requestsDto = requestService.getAllRequest(from, size, userDto.getId());
+        List<RequestsDto> requestsDto = requestService.getAllRequest(from, size, actualUserDto.getId());
 
         assertEquals(1, requestsDto.size());
     }
@@ -71,6 +71,6 @@ class RequestServiceImplIntegrationTest {
     @Test
     @DirtiesContext
     void getRequestById() {
-        assertEquals(1, requestService.getRequestById(requestsDto.getId(), userDto.getId()).getId());
+        assertEquals(1, requestService.getRequestById(actualRequestsDto.getId(), actualUserDto.getId()).getId());
     }
 }

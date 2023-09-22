@@ -44,7 +44,7 @@ class BookingControllerTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
-    private BookingDto bookingDto;
+    private BookingDto createdBookingDto;
 
     @BeforeEach
     public void setUp() {
@@ -52,11 +52,11 @@ class BookingControllerTest {
                 .standaloneSetup(controller)
                 .build();
 
-        bookingDto = generator.nextObject(BookingDto.class);
-        bookingDto.setStart(LocalDateTime.now().plusDays(1));
-        bookingDto.setEnd(LocalDateTime.now().plusDays(2));
-        bookingDto.setItemId(bookingDto.getItem().getId());
-        bookingDto.setBookerId(bookingDto.getBooker().getId());
+        createdBookingDto = generator.nextObject(BookingDto.class);
+        createdBookingDto.setStart(LocalDateTime.now().plusDays(1));
+        createdBookingDto.setEnd(LocalDateTime.now().plusDays(2));
+        createdBookingDto.setItemId(createdBookingDto.getItem().getId());
+        createdBookingDto.setBookerId(createdBookingDto.getBooker().getId());
 
         mapper.registerModule(new JavaTimeModule());
     }
@@ -65,30 +65,30 @@ class BookingControllerTest {
     void addBooking() throws Exception {
         when(bookingService.addBooking(any(BookingDto.class), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return bookingDto;
+                    return createdBookingDto;
                 });
 
         mvc.perform(post("/bookings")
-                        .content(mapper.writeValueAsString(bookingDto))
-                        .header("X-Sharer-User-Id", String.valueOf(bookingDto.getBooker().getId()))
+                        .content(mapper.writeValueAsString(createdBookingDto))
+                        .header("X-Sharer-User-Id", String.valueOf(createdBookingDto.getBooker().getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(bookingDto.getId()));
+                .andExpect(jsonPath("$.id").value(createdBookingDto.getId()));
     }
 
     @Test
     void changeStatus() throws Exception {
-        bookingDto.setStatus(APPROVED);
+        createdBookingDto.setStatus(APPROVED);
         when(bookingService.changeStatus(anyLong(), anyBoolean(), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return bookingDto;
+                    return createdBookingDto;
                 });
 
-        mvc.perform(patch("/bookings/{bookingId}", bookingDto.getId())
+        mvc.perform(patch("/bookings/{bookingId}", createdBookingDto.getId())
                         .param("approved", "true")
-                        .header("X-Sharer-User-Id", String.valueOf(bookingDto.getBooker().getId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdBookingDto.getBooker().getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
@@ -100,27 +100,27 @@ class BookingControllerTest {
     void getById() throws Exception {
         when(bookingService.getById(anyLong(), anyLong()))
                 .thenAnswer(invocationOnMock -> {
-                    return bookingDto;
+                    return createdBookingDto;
                 });
 
-        mvc.perform(get("/bookings/{bookingId}", bookingDto.getId())
-                        .header("X-Sharer-User-Id", String.valueOf(bookingDto.getBooker().getId()))
+        mvc.perform(get("/bookings/{bookingId}", createdBookingDto.getId())
+                        .header("X-Sharer-User-Id", String.valueOf(createdBookingDto.getBooker().getId()))
                         .characterEncoding(UTF_8)
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(bookingDto.getId()));
+                .andExpect(jsonPath("$.id").value(createdBookingDto.getId()));
     }
 
     @Test
     void getByUserIdAndStateByBooker() throws Exception {
         when(bookingService.getByUserIdAndStateByBooker(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenAnswer(invocationOnMock -> {
-                    return List.of(bookingDto);
+                    return List.of(createdBookingDto);
                 });
 
         mvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", String.valueOf(bookingDto.getBooker().getId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdBookingDto.getBooker().getId()))
                         .param("state", "ALL")
                         .param("from", "0")
                         .param("size", "10")
@@ -128,18 +128,18 @@ class BookingControllerTest {
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(bookingDto.getId()));
+                .andExpect(jsonPath("$[0].id").value(createdBookingDto.getId()));
     }
 
     @Test
     void getByUserIdAndStateByOwner() throws Exception {
         when(bookingService.getByUserIdAndStateByOwner(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenAnswer(invocationOnMock -> {
-                    return List.of(bookingDto);
+                    return List.of(createdBookingDto);
                 });
 
         mvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", String.valueOf(bookingDto.getItem().getOwner().getId()))
+                        .header("X-Sharer-User-Id", String.valueOf(createdBookingDto.getItem().getOwner().getId()))
                         .param("state", "ALL")
                         .param("from", "0")
                         .param("size", "10")
@@ -147,6 +147,6 @@ class BookingControllerTest {
                         .contentType(APPLICATION_JSON)
                         .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(bookingDto.getId()));
+                .andExpect(jsonPath("$[0].id").value(createdBookingDto.getId()));
     }
 }

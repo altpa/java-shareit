@@ -48,39 +48,39 @@ class RequestServiceImplTest {
     @InjectMocks
     private RequestServiceImpl requestService;
 
-    private User user1;
-    private Item item1;
-    private Request request1;
+    private User createdUser1;
+    private Item createdItem1;
+    private Request createdRequest1;
 
     @BeforeEach
     public void setUp() {
-        user1 = generator.nextObject(User.class);
-        request1 = generator.nextObject(Request.class);
-        item1 = generator.nextObject(Item.class);
+        createdUser1 = generator.nextObject(User.class);
+        createdRequest1 = generator.nextObject(Request.class);
+        createdItem1 = generator.nextObject(Item.class);
     }
 
     @Test
     void save() {
-        request1.setOwnerId(user1.getId());
-        RequestsDto requestsDto = mapper.requestToRequestDto(request1);
+        createdRequest1.setOwnerId(createdUser1.getId());
+        RequestsDto requestsDto = mapper.requestToRequestDto(createdRequest1);
 
         when(userService.checkOwner(anyLong())).thenReturn(true);
 
-        when(requestRepository.save(any())).thenReturn(request1);
+        when(requestRepository.save(any())).thenReturn(createdRequest1);
 
-        RequestsDto answer = requestService.save(requestsDto, user1.getId());
+        RequestsDto answer = requestService.save(requestsDto, createdUser1.getId());
 
-        assertEquals(answer.getId(), request1.getId());
+        assertEquals(answer.getId(), createdRequest1.getId());
     }
 
     @Test
     void saveWhenUserNotFound() {
-        RequestsDto requestsDto = mapper.requestToRequestDto(request1);
+        RequestsDto requestsDto = mapper.requestToRequestDto(createdRequest1);
 
         when(userService.checkOwner(anyLong())).thenReturn(false);
 
         assertThrows(ObjectNotFoundException.class, () -> {
-            RequestsDto answer = requestService.save(requestsDto, user1.getId());
+            RequestsDto answer = requestService.save(requestsDto, createdUser1.getId());
         });
     }
 
@@ -89,14 +89,14 @@ class RequestServiceImplTest {
         when(userService.checkOwner(anyLong())).thenReturn(true);
 
         when(requestRepository.findByOwnerId(anyLong()))
-                .thenReturn(Streamable.of(List.of(request1)));
+                .thenReturn(Streamable.of(List.of(createdRequest1)));
 
-        when(itemRepository.findByRequestId(anyLong())).thenReturn(Streamable.of(List.of(item1)));
+        when(itemRepository.findByRequestId(anyLong())).thenReturn(Streamable.of(List.of(createdItem1)));
 
-        List<RequestsDto> answer = requestService.getOwnRequests(user1.getId());
+        List<RequestsDto> answer = requestService.getOwnRequests(createdUser1.getId());
 
         assertEquals(1, answer.size());
-        assertEquals(answer.get(0).getId(), request1.getId());
+        assertEquals(answer.get(0).getId(), createdRequest1.getId());
         assertEquals(1, answer.get(0).getItems().size());
     }
 
@@ -105,24 +105,24 @@ class RequestServiceImplTest {
         when(userService.checkOwner(anyLong())).thenReturn(false);
 
         assertThrows(ObjectNotFoundException.class, () -> {
-            List<RequestsDto> answer = requestService.getOwnRequests(user1.getId());
+            List<RequestsDto> answer = requestService.getOwnRequests(createdUser1.getId());
         });
     }
 
     @Test
     void getAllRequest() {
-        Page<Request> page = new PageImpl<>(List.of(request1));
+        Page<Request> page = new PageImpl<>(List.of(createdRequest1));
 
         when(userService.checkOwner(anyLong())).thenReturn(true);
 
         when(requestRepository.findAll((Pageable) any())).thenReturn(page);
 
         when(itemRepository.findByOwnerIdAndRequestId(anyLong(), anyLong()))
-                .thenReturn(Streamable.of(List.of(item1)));
+                .thenReturn(Streamable.of(List.of(createdItem1)));
 
-        List<RequestsDto> answer = requestService.getAllRequest(0, 2, user1.getId());
+        List<RequestsDto> answer = requestService.getAllRequest(0, 2, createdUser1.getId());
 
-        assertEquals(answer.get(0).getId(), request1.getId());
+        assertEquals(answer.get(0).getId(), createdRequest1.getId());
     }
 
     @Test
@@ -130,7 +130,7 @@ class RequestServiceImplTest {
         when(userService.checkOwner(anyLong())).thenReturn(false);
 
         assertThrows(ObjectNotFoundException.class, () -> {
-            List<RequestsDto> answer = requestService.getAllRequest(0, 2, user1.getId());
+            List<RequestsDto> answer = requestService.getAllRequest(0, 2, createdUser1.getId());
         });
     }
 
@@ -138,13 +138,13 @@ class RequestServiceImplTest {
     void getRequestById() {
         when(userService.checkOwner(anyLong())).thenReturn(true);
 
-        when(requestRepository.findById(anyLong())).thenReturn(Optional.of(request1));
+        when(requestRepository.findById(anyLong())).thenReturn(Optional.of(createdRequest1));
 
-        when(itemRepository.findByRequestId(anyLong())).thenReturn(Streamable.of(List.of(item1)));
+        when(itemRepository.findByRequestId(anyLong())).thenReturn(Streamable.of(List.of(createdItem1)));
 
-        RequestsDto answer = requestService.getRequestById(request1.getId(), user1.getId());
+        RequestsDto answer = requestService.getRequestById(createdRequest1.getId(), createdUser1.getId());
 
-        assertEquals(answer.getId(), request1.getId());
+        assertEquals(answer.getId(), createdRequest1.getId());
     }
 
     @Test
@@ -152,7 +152,7 @@ class RequestServiceImplTest {
         when(userService.checkOwner(anyLong())).thenReturn(false);
 
         assertThrows(ObjectNotFoundException.class, () -> {
-            RequestsDto answer = requestService.getRequestById(request1.getId(), user1.getId());
+            RequestsDto answer = requestService.getRequestById(createdRequest1.getId(), createdUser1.getId());
         });
     }
 }
