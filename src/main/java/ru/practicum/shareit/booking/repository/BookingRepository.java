@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.util.Streamable;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,37 +17,41 @@ import java.util.Optional;
 
 @EnableJpaRepositories
 @Transactional
-public interface BookingRepository extends Repository<Booking, Long> {
+public interface BookingRepository extends Repository<Booking, Long>, PagingAndSortingRepository<Booking, Long> {
     Booking save(Booking booking);
 
     Optional<Booking> findByIdOrderByIdDesc(Long bookingId);
 
-    Streamable<Booking> findByBookerIdOrderByIdDesc(Long bookerId);
+    Page<Booking> findByBookerIdOrderByIdDesc(Long bookerId, Pageable pageable);
 
-    Streamable<Booking> findByBookerIdAndStatusOrderByIdDesc(Long bookerId, BookingStatus status);
+    Page<Booking> findByBookerIdAndStatusOrderByIdDesc(Long bookerId, BookingStatus status, Pageable pageable);
 
-    Streamable<Booking>
+    Page<Booking>
     findByBookerIdAndStartBeforeAndEndAfterOrderByIdAsc(Long bookerId, LocalDateTime nowForStart,
-                                                        LocalDateTime nowForEnd);
+                                                        LocalDateTime nowForEnd, Pageable pageable);
 
-    Streamable<Booking> findByBookerIdAndEndBeforeOrderByIdDesc(Long bookerId, LocalDateTime now);
+    Page<Booking> findByBookerIdAndEndBeforeOrderByIdDesc(Long bookerId, LocalDateTime now, Pageable pageable);
 
-    Streamable<Booking> findByBookerIdAndStartAfterOrderByIdDesc(Long bookerId, LocalDateTime now);
+    Page<Booking> findByBookerIdAndStartAfterOrderByIdDesc(Long bookerId, LocalDateTime now, Pageable pageable);
 
-    Streamable<Booking> findByItemOwnerIdOrderByIdDesc(Long bookerId);
+    Page<Booking> findByItemOwnerIdOrderByIdDesc(Long bookerId, Pageable pageable);
 
-    Streamable<Booking> findByItemOwnerIdAndStatusOrderByIdDesc(Long bookerId, BookingStatus status);
+    Page<Booking> findByItemOwnerIdAndStatusOrderByIdDesc(Long bookerId, BookingStatus status, Pageable pageable);
 
-    Streamable<Booking>
+    Page<Booking>
     findByItemOwnerIdAndStartBeforeAndEndAfterOrderByIdAsc(Long bookerId, LocalDateTime nowForStart,
-                                                           LocalDateTime nowForEnd);
+                                                           LocalDateTime nowForEnd, Pageable pageable);
 
-    Streamable<Booking> findByItemOwnerIdAndEndBeforeOrderByIdDesc(Long bookerId, LocalDateTime now);
+    Page<Booking> findByItemOwnerIdAndEndBeforeOrderByIdDesc(Long bookerId, LocalDateTime now, Pageable pageable);
 
-    Streamable<Booking> findByItemOwnerIdAndStartAfterOrderByIdDesc(Long bookerId, LocalDateTime now);
+    Page<Booking> findByItemOwnerIdAndStartAfterOrderByIdDesc(Long bookerId, LocalDateTime now, Pageable pageable);
 
     Streamable<LastOrNextBooking> findByItemIdOrderByStartAsc(Long itemId);
 
     Optional<List<Booking>> findByItemIdAndBookerIdAndStatusAndEndBefore(Long itemId, Long booker,
                                                                          BookingStatus status, LocalDateTime now);
+
+    long countByBookerId(long userId);
+
+    long countByItemOwnerId(long userId);
 }

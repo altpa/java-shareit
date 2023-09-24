@@ -26,6 +26,10 @@ public class ItemDto {
     private User owner;
 
     private LastOrNextBooking lastBooking;
+
     private LastOrNextBooking nextBooking;
+
     private List<Comment> comments;
+
+    private long requestId;
 }

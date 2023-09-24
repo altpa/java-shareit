@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.util.Streamable;
@@ -15,16 +17,14 @@ public interface ItemRepository extends Repository<Item, Long> {
 
     Optional<Item> findById(Long primaryKey);
 
-    Streamable<Item> findAll();
+    Page<Item>
+    findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String searchName,
+                                                                     String searchDescription,
+                                                                     Pageable pageable);
 
-    long count();
+    Page<Item> findByOwnerId(Long ownerId, Pageable pageable);
 
-    void delete(Item item);
+    Streamable<Item> findByOwnerIdAndRequestId(Long ownerId, Long requestId);
 
-    boolean existsById(Long primaryKey);
-
-    Streamable<Item>
-    findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(String searchName, String searchDescription);
-
-    Streamable<Item> findByOwnerId(Long ownerId);
+    Streamable<Item> findByRequestId(Long requestId);
 }

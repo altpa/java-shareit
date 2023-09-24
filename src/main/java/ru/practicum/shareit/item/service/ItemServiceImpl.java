@@ -3,10 +3,11 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.LastOrNextBooking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.dto.CommentMapper;
 import ru.practicum.shareit.comment.model.Comment;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static ru.practicum.shareit.booking.BookingStatus.APPROVED;
@@ -33,13 +35,14 @@ import static ru.practicum.shareit.booking.BookingStatus.APPROVED;
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
+    private static final CommentMapper commentMapper = CommentMapper.INSTANCE;
+    private static final ItemMapper itemMapper = ItemMapper.INSTANCE;
+    private static final int FROM = 0;
+    private static final int SIZE = 10;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
-    private final BookingService bookingService;
-    private static final ItemMapper itemMapper = ItemMapper.INSTANCE;
-    private static final CommentMapper commentMapper = CommentMapper.INSTANCE;
 
     @Override
     public ItemDto addItem(ItemDto itemDto, long ownerId, boolean isOwnerExist) {
@@ -49,13 +52,12 @@ public class ItemServiceImpl implements ItemService {
         ItemDto item = itemMapper.itemToItemDto(itemRepository.save(itemMapper.itemDtoToItem(itemDto)));
         log.debug("-ItemServiceImpl - addItem: " + item);
         return item;
-
    }
 
     @Override
     public List<ItemDto> getAllItemsByOwnerId(long ownerId) {
         log.debug("+ItemServiceImpl - getAllItemsByOwnerId: ownerId = " + ownerId);
-        List<ItemDto> allItemsByOwnerId = itemRepository.findByOwnerId(ownerId)
+        List<ItemDto> allItemsByOwnerId = itemRepository.findByOwnerId(ownerId, PageRequest.of(FROM, SIZE))
                 .stream()
                 .map(itemMapper::itemToItemDto)
                 .collect(toList());
@@ -107,7 +109,8 @@ public class ItemServiceImpl implements ItemService {
         log.debug("+ItemServiceImpl - searchItems: searchText = " + searchText);
         if (!searchText.isEmpty()) {
             List<ItemDto> items = itemRepository
-                    .findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(searchText, searchText)
+                    .findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(searchText,
+                            searchText, PageRequest.of(FROM, SIZE))
                     .stream()
                     .map(itemMapper::itemToItemDto)
                     .collect(toList());
@@ -125,11 +128,11 @@ public class ItemServiceImpl implements ItemService {
                 + itemId);
         log.debug("ItemServiceImpl - addComment: " + LocalDateTime.now());
 
-        List<Booking> booking = bookingRepository
+        Optional<List<Booking>> booking = bookingRepository
                 .findByItemIdAndBookerIdAndStatusAndEndBefore(itemId, userId, APPROVED,
-                        LocalDateTime.now()).get();
+                        LocalDateTime.now());
 
-        if (booking.isEmpty()) {
+        if (booking.get().isEmpty()) {
             throw new BadRequestException("userId = " + userId + " not booked itemId = "
                     + itemId);
         }
@@ -152,8 +155,7 @@ public class ItemServiceImpl implements ItemService {
         return answer;
     }
 
-    @Override
-    public List<Comment> getCommentsToItem(ItemDto item) {
+    private List<Comment> getCommentsToItem(ItemDto item) {
         log.debug("+ItemServiceImpl - setCommentsToItem: ItemDtoWithBooking = " + item);
         List<Comment> comments = Collections.emptyList();
         try {
@@ -162,6 +164,7 @@ public class ItemServiceImpl implements ItemService {
                     .collect(toList());
         } catch (InvalidDataAccessResourceUsageException e) {
             log.debug("ItemServiceImpl - setCommentsToItem: no comments");
+            throw new ObjectNotFoundException("itemId = " + item.getId() + " no comments");
         }
         log.debug("ItemServiceImpl - setCommentsToItem: comments = " + comments);
         return comments;
@@ -169,8 +172,52 @@ public class ItemServiceImpl implements ItemService {
 
     private ItemDto setCommentsAndBooking(ItemDto itemDto, long ownerId) {
         itemDto.setComments(getCommentsToItem(itemDto));
-        itemDto.setLastBooking(bookingService.getLastBooking(itemDto, ownerId));
-        itemDto.setNextBooking(bookingService.getNextBooking(itemDto, ownerId));
+        itemDto.setLastBooking(getLastBooking(itemDto, ownerId));
+        itemDto.setNextBooking(getNextBooking(itemDto, ownerId));
         return itemDto;
+    }
+
+
+    private LastOrNextBooking getLastBooking(ItemDto item, long ownerId) {
+        boolean isLastBooking = true;
+        return getBookingToItem(item, ownerId, isLastBooking);
+    }
+
+    private LastOrNextBooking getNextBooking(ItemDto item, long ownerId) {
+        boolean isLastBooking = false;
+        return getBookingToItem(item, ownerId, isLastBooking);
+    }
+
+    private LastOrNextBooking getBookingToItem(ItemDto item, long ownerId, boolean isLastBooking) {
+        log.debug("+ItemServiceImpl - getBookingToItem: ItemDtoWithBooking = " + item + ", ownerId = " + ownerId);
+        List<LastOrNextBooking> bookings = bookingRepository
+                .findByItemIdOrderByStartAsc(item.getId())
+                .stream()
+                .filter(b -> b.getStatus().equals(APPROVED))
+                .collect(Collectors.toList());
+
+        log.debug("ItemServiceImpl - getBookingToItem: bookings = " + bookings
+                + ", LocalDateTime.now() = " + LocalDateTime.now());
+        LastOrNextBooking answer = null;
+        if (item.getOwner().getId() == ownerId && !bookings.isEmpty()) {
+            LocalDateTime now = LocalDateTime.now();
+
+            int lastBookingIndex = 0;
+            for (int i = 0; i < bookings.size(); i++) {
+                if (bookings.get(i).getStart().isBefore(now)) {
+                    lastBookingIndex = i;
+                }
+            }
+            int nextBookingIndex = lastBookingIndex + 1;
+            if (isLastBooking) {
+                if (bookings.get(lastBookingIndex).getStart().isBefore(now)) {
+                    answer = bookings.get(lastBookingIndex);
+                }
+            } else if (bookings.size() > nextBookingIndex) {
+                answer = bookings.get(nextBookingIndex);
+            }
+        }
+        log.debug("-ItemServiceImpl - getBookingToItem: ItemDtoWithBooking = " + item);
+        return answer;
     }
 }
