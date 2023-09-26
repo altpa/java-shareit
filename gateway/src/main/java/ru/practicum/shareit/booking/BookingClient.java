@@ -34,14 +34,14 @@ public class BookingClient extends BaseClient {
     public ResponseEntity<Object> changeStatus(long bookingId, Boolean approved, long userId) {
         log.info("changeStatus:" + bookingId + "approved:" + approved + "userId:" + userId);
         Map<String, Object> parameters = Map.of(
-                "approved", approved
+                "approved", approved.toString()
         );
         log.info(parameters.toString());
-        return patch("/" + bookingId + "?approved={approved}", userId, parameters);
+        return patch("/" + bookingId + "?approved={approved}", userId, parameters, null);
     }
 
     public ResponseEntity<Object> getById(long bookingId, long userId) {
-        return patch("/" + bookingId, userId);
+        return get("/" + bookingId, userId);
     }
 
     public ResponseEntity<Object> getByUserIdAndStateByBooker(long userId, String state, int from, int size) {

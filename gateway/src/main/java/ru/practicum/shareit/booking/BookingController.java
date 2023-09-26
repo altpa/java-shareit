@@ -45,7 +45,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Object>  getById(@PathVariable long bookingId, @RequestHeader(HEADER) long userId) {
+    public ResponseEntity<Object> getById(@PathVariable long bookingId, @RequestHeader(HEADER) long userId) {
         log.debug("+BookingController - getById: bookingId = " + bookingId +  ", userId = " + userId);
         ResponseEntity<Object>  answer = bookingClient.getById(bookingId, userId);
         log.debug("+BookingController - getById: answer = " + answer);
@@ -53,7 +53,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<Object>  getByUserIdAndStateByBooker(
+    public ResponseEntity<Object> getByUserIdAndStateByBooker(
                                         @RequestHeader(HEADER) long userId,
                                         @RequestParam(defaultValue = "ALL") String state,
                                         @RequestParam(name = "from", defaultValue = "0") @Min(0) int from,
@@ -66,7 +66,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object>  getByUserIdAndStateByOwner(@RequestHeader(HEADER) long userId,
+    public ResponseEntity<Object> getByUserIdAndStateByOwner(@RequestHeader(HEADER) long userId,
                                         @RequestParam(defaultValue = "ALL") String state,
                                         @RequestParam(name = "from", defaultValue = "0") @Min(0) int from,
                                         @RequestParam(name = "size", defaultValue = "10") @Min(1) int size) {

@@ -9,7 +9,7 @@ services:
       - POSTGRES_DB=shareIt
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
-    container_name: db
+    container_name: db_container
     ports:
       - "6541:5432"
 

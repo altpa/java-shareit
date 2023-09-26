@@ -32,7 +32,7 @@ public class RequestClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getOwnRequests(long ownerId) {
-        return get("/" + ownerId);
+        return get("/", ownerId);
     }
 
     public ResponseEntity<Object> getAllRequest(int from, int size, long userId) {

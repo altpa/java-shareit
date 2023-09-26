@@ -57,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getAllItemsByOwnerId(long ownerId) {
         log.debug("+ItemServiceImpl - getAllItemsByOwnerId: ownerId = " + ownerId);
-        List<ItemDto> allItemsByOwnerId = itemRepository.findByOwnerId(ownerId, PageRequest.of(FROM, SIZE))
+        List<ItemDto> allItemsByOwnerId = itemRepository.findByOwnerIdOrderByIdAsc(ownerId, PageRequest.of(FROM, SIZE))
                 .stream()
                 .map(itemMapper::itemToItemDto)
                 .collect(toList());

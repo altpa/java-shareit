@@ -22,7 +22,7 @@ public interface ItemRepository extends Repository<Item, Long> {
                                                                      String searchDescription,
                                                                      Pageable pageable);
 
-    Page<Item> findByOwnerId(Long ownerId, Pageable pageable);
+    Page<Item> findByOwnerIdOrderByIdAsc(Long ownerId, Pageable pageable);
 
     Streamable<Item> findByOwnerIdAndRequestId(Long ownerId, Long requestId);
 

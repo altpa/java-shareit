@@ -48,6 +48,6 @@ public class Booking {
     @ToString.Exclude
     private User booker;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private BookingStatus status;
 }
