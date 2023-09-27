@@ -14,6 +14,4 @@ public interface UserService {
     UserDto getUserById(long userId);
 
     UserDto deleteUser(long userId);
-
-//    Boolean checkOwner(long userId);
 }

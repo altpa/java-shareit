@@ -74,12 +74,4 @@ public class UserServiceImpl implements UserService {
         log.debug("-UserServiceImpl - deleteUser: " + user);
         return user;
     }
-
-//    @Override
-//    public Boolean checkOwner(long userId) {
-//        log.debug("+UserServiceImpl - checkOwner: userId = " + userId);
-//        Boolean isExist = userRepository.existsById(userId);
-//        log.debug("-UserServiceImpl - checkOwner: userId = " + userId + ", isExist = " + isExist);
-//        return isExist;
-//    }
 }

@@ -21,7 +21,6 @@ public class RequestsDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
     @FutureOrPresent
-//    @NotBlank(message = "created may not be blank", groups = Marker.OnCreate.class)
     LocalDateTime created;
 
     private Set<Item> items;

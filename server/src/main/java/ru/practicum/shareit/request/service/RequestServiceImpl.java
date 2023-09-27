@@ -12,7 +12,6 @@ import ru.practicum.shareit.request.dto.RequestMapper;
 import ru.practicum.shareit.request.dto.RequestsDto;
 import ru.practicum.shareit.request.repository.RequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
