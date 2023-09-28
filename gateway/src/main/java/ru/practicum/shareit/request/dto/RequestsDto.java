@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.model.Item;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ public class RequestsDto {
     long id;
 
     @NotBlank(message = "description may not be blank")
+    @Size(min = 1, max = 500)
     String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)

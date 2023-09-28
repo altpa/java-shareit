@@ -37,7 +37,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto addBooking(BookingDto bookingDto, long userId) {
-        log.debug("+BookingServiceImpl - addBooking: " + bookingDto + ", userId = " + userId);
+        log.debug("+BookingServiceImpl - addBooking: {}, userId = {}", bookingDto, userId);
         if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
             throw new BadRequestException("start = " + bookingDto.getStart() + " after or equals end = "
                     + bookingDto.getEnd());
@@ -68,8 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto changeStatus(Long bookingId, boolean approved, long userId) {
-        log.debug("+BookingServiceImpl - changeStatus: bookingId = " + bookingId +
-                ", approved = " + approved + ", userId = " + userId);
+        log.debug("+BookingServiceImpl - changeStatus: bookingId = {}, approved = {}, userId = {}", bookingId, approved, userId);
         Booking booking = bookingRepository.findByIdOrderByIdDesc(bookingId)
                 .orElseThrow(() -> new ObjectNotFoundException("bookingId = " + bookingId + " not found"));
 
@@ -96,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto getById(long bookingId, long userId) {
-        log.debug("+BookingServiceImpl - getById: bookingId = " + bookingId + ", userId = " + userId);
+        log.debug("+BookingServiceImpl - getById: bookingId = {}, userId = {}", bookingId, userId);
         checkUser(userId);
         BookingDto booking =
                 mapper.bookingToBookingDto(bookingRepository.findByIdOrderByIdDesc(bookingId)
@@ -118,8 +117,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getByUserIdAndStateByBooker(long userId, String state, int from, int size) {
-        log.info("+BookingServiceImpl - getByUserIdAndStateByBooker: userId = " + userId + ", state = " + state
-                + ", from = " + from + ", size = " + size);
+        log.info("+BookingServiceImpl - getByUserIdAndStateByBooker: userId = {}, state = {}, from = {}, size = {}", userId, state, from, size);
         boolean isBooker = true;
         List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker, from, size);
         log.info("-BookingServiceImpl - getByUserIdAndStateByBooker: " + answer);
@@ -128,11 +126,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getByUserIdAndStateByOwner(long userId, String state, int from, int size) {
-        log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state
-                + ", from = " + from + ", size = " + size);
+        log.info("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = {}, state = {}, from = {}, size = {}", userId, state, from, size);
+
         boolean isBooker = false;
         List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker, from, size);
-        log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = " + userId + ", state = " + state);
+        log.debug("+BookingServiceImpl - getByUserIdAndStateByOwner: userId = {}, state = {}", userId, state);
         return answer;
     }
 

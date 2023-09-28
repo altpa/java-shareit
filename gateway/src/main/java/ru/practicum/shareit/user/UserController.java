@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.validation.Marker;
-
-import javax.validation.Valid;
+import ru.practicum.shareit.validation.Create;
+import ru.practicum.shareit.validation.Update;
 
 @Slf4j
 @Controller
@@ -42,8 +41,7 @@ public class UserController {
     }
 
     @PostMapping
-    @Validated({Marker.OnCreate.class})
-    public ResponseEntity<Object> addUser(@Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<Object> addUser(@Validated(Create.class) @RequestBody UserDto userDto) {
         log.debug("+UserController - addUser: " + userDto);
         ResponseEntity<Object>  user = userClient.addUser(userDto);
         log.debug("-UserController - addUser: " + user);
@@ -51,8 +49,8 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<Object> updateUser(@RequestBody UserDto userDto, @PathVariable int userId) {
-        log.debug("+UserController - updateUser: " + userDto + "userId = " + userId);
+    public ResponseEntity<Object> updateUser(@Validated(Update.class) @RequestBody UserDto userDto, @PathVariable int userId) {
+        log.debug("+UserController - updateUser:  {}, userId = {}", userDto, userId);
         ResponseEntity<Object>  user = userClient.updateUser(userDto, userId);
         log.debug("-UserController - updateUser: " + user);
         return user;

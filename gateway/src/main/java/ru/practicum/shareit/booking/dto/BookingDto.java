@@ -5,7 +5,7 @@ import lombok.Data;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.validation.Marker;
+import ru.practicum.shareit.validation.Create;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
@@ -18,20 +18,19 @@ public class BookingDto {
     private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
-    @FutureOrPresent
-    @NotNull
+    @FutureOrPresent(groups = Create.class)
+    @NotNull(groups = Create.class)
     private LocalDateTime start;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
-    @FutureOrPresent
-    @NotNull
+    @FutureOrPresent(groups = Create.class)
+    @NotNull(groups = Create.class)
     private LocalDateTime end;
 
     private Item item;
 
     private User booker;
 
-    @NotNull(groups = Marker.OnCreate.class)
     private BookingStatus status;
 
     private long itemId;

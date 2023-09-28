@@ -48,7 +48,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable int userId) {
-        log.debug("+UserController - updateUser: " + userDto + "userId = " + userId);
+        log.debug("+UserController - updateUser:  {}, userId = {}", userDto, userId);
         UserDto user = userService.updateUser(userDto, userId);
         log.debug("-UserController - updateUser: " + user);
         return user;

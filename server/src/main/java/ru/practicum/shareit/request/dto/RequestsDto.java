@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
 
-import javax.validation.constraints.FutureOrPresent;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -16,15 +13,12 @@ public class RequestsDto {
 
     long id;
 
-    @NotBlank(message = "description may not be blank")
     String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
-    @FutureOrPresent
     LocalDateTime created;
 
     private Set<Item> items;
 
-    @NotNull(message = "ownerId may not be blank")
     private long ownerId;
 }

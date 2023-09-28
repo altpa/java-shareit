@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,16 +13,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.validation.Marker;
+import ru.practicum.shareit.validation.Create;
+import ru.practicum.shareit.validation.Update;
 
 import javax.validation.Valid;
 
 @Slf4j
 @Validated
-@RestController
+@Controller
 @RequestMapping("/items")
 @RequiredArgsConstructor
 public class ItemController {
@@ -29,9 +30,8 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @PostMapping
-    @Validated({Marker.OnCreate.class})
-    public ResponseEntity<Object> addItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(HEADER) long ownerId) {
-        log.debug("+ItemController - addItem: " + itemDto + ". ownerId = " + ownerId);
+    public ResponseEntity<Object> addItem(@Validated(Create.class) @RequestBody ItemDto itemDto, @RequestHeader(HEADER) long ownerId) {
+        log.debug("+ItemController - addItem: {}. ownerId = {}", itemDto, ownerId);
         ResponseEntity<Object> item = itemClient.addItem(itemDto, ownerId);
         log.debug("-ItemController - addItem: " + item);
         return item;
@@ -46,9 +46,9 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> updateItem(@RequestBody ItemDto itemDto,
+    public ResponseEntity<Object> updateItem(@Validated(Update.class) @RequestBody ItemDto itemDto,
                                     @RequestHeader(HEADER) long ownerId, @PathVariable long itemId) {
-        log.debug("+ItemController - updateItem: " + itemDto + ". ownerId = " + ownerId + ". itemId = " + itemId);
+        log.debug("+ItemController - updateItem: {}. ownerId = {}. itemId = {}", itemDto, ownerId, itemId);
         ResponseEntity<Object> item = itemClient.updateItem(itemDto, ownerId, itemId);
         log.debug("-ItemController - updateItem: " + item);
         return item;
@@ -73,7 +73,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> addComment(@Valid @RequestBody CommentDto comment, @PathVariable long itemId,
                               @RequestHeader(HEADER) long ownerId) {
-        log.debug("+ItemController - addComment: comment = " + comment + ", ownerId = " + ownerId);
+        log.debug("+ItemController - addComment: comment = {}, ownerId = {}", comment, ownerId);
         ResponseEntity<Object> answer = itemClient.addComment(comment, ownerId, itemId);
         log.debug("-ItemController - addComment: " + answer);
         return answer;

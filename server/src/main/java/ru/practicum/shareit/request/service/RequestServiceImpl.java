@@ -60,7 +60,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<RequestsDto> getAllRequest(int from, int size, long userId) {
         checkUser(userId);
-        log.info("+RequestServiceImpl - getAllRequest: from = " + from + ", size = " + size);
+        log.info("+RequestServiceImpl - getAllRequest: from = {}, size = {}", from, size);
         List<RequestsDto> answer = requestRepository.findAll(PageRequest.of(from, size, Sort.by("created")))
                 .stream()
                 .map(mapper::requestToRequestDto)

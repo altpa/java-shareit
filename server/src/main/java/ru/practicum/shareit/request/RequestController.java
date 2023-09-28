@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.request.dto.RequestsDto;
 import ru.practicum.shareit.request.service.RequestService;
 
-import javax.validation.constraints.Min;
 import java.util.List;
 
 @Slf4j
@@ -42,10 +41,10 @@ public class RequestController {
     }
 
     @GetMapping("/all")
-    List<RequestsDto> getAllRequest(@RequestParam(name = "from", defaultValue = "0") @Min(0) int from,
-                                    @RequestParam(name = "size", defaultValue = "10") @Min(1) int size,
+    List<RequestsDto> getAllRequest(@RequestParam(name = "from", defaultValue = "0") int from,
+                                    @RequestParam(name = "size", defaultValue = "10") int size,
                                     @RequestHeader(HEADER) long userId) {
-        log.info("+requestController - getAllRequest: from = " + from + ", size = " + size);
+        log.info("+requestController - getAllRequest: from = {}, size = {}", from, size);
         List<RequestsDto> answer = requestService.getAllRequest(from, size, userId);
         log.info("-requestController - getAllRequest: " + answer);
         return answer;

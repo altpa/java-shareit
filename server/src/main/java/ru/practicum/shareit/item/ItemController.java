@@ -2,7 +2,6 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validation.Marker;
 
 import java.util.List;
 
@@ -27,12 +24,10 @@ import java.util.List;
 public class ItemController {
     private static final String HEADER = "X-Sharer-User-Id";
     private final ItemService itemService;
-    private final UserService userService;
 
     @PostMapping
-    @Validated({Marker.OnCreate.class})
     public ItemDto addItem(@RequestBody ItemDto itemDto, @RequestHeader(HEADER) long ownerId) {
-        log.debug("+ItemController - addItem: " + itemDto + ". ownerId = " + ownerId);
+        log.debug("+ItemController - addItem: {}. ownerId = {}", itemDto, ownerId);
         ItemDto item = itemService.addItem(itemDto, ownerId);
         log.debug("-ItemController - addItem: " + item);
         return item;
@@ -49,7 +44,7 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestBody ItemDto itemDto,
                                     @RequestHeader(HEADER) long ownerId, @PathVariable long itemId) {
-        log.debug("+ItemController - updateItem: " + itemDto + ". ownerId = " + ownerId + ". itemId = " + itemId);
+        log.debug("+ItemController - updateItem: {}. ownerId = {}. itemId = {}", itemDto, ownerId, itemId);
         ItemDto item = itemService.updateItem(itemDto, ownerId, itemId);
         log.debug("-ItemController - updateItem: " + item);
         return item;
@@ -74,7 +69,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@RequestBody CommentDto comment, @PathVariable long itemId,
                               @RequestHeader(HEADER) long ownerId) {
-        log.debug("+ItemController - addComment: comment = " + comment + ", ownerId = " + ownerId);
+        log.debug("+ItemController - addComment: comment = {}, ownerId = {}", comment, ownerId);
         CommentDto answer = itemService.addComment(comment, ownerId, itemId);
         log.debug("-ItemController - addComment: " + answer);
         return answer;

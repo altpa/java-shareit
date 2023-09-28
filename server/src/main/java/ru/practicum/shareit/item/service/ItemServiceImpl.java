@@ -46,7 +46,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(ItemDto itemDto, long ownerId) {
-        log.debug("+ItemServiceImpl - addItem: " + itemDto + ". ownerId = " + ownerId);
+        log.debug("+ItemServiceImpl - addItem: {}. ownerId = {}", itemDto, ownerId);
         itemDto.setOwner(userRepository.findById(ownerId)
                 .orElseThrow(() ->  new ObjectNotFoundException("ownerId не найден")));
         ItemDto item = itemMapper.itemToItemDto(itemRepository.save(itemMapper.itemDtoToItem(itemDto)));
@@ -72,7 +72,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, long ownerId, long itemId) {
-        log.debug("+ItemServiceImpl - updateItem: " + itemDto + ". ownerId = " + ownerId + ". itemId = " + itemId);
+        log.debug("+ItemServiceImpl - updateItem: {}. ownerId = {}. itemId = {}", itemDto, ownerId, itemId);
 
         if (userRepository.existsById(ownerId).equals(false)) {
             throw new ObjectNotFoundException("userId = " + ownerId + ", not found");
@@ -128,8 +128,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(CommentDto commentDto, long userId, long itemId) {
-        log.debug("+ItemServiceImpl - addComment: comment = " + commentDto + ", ownerId = " + userId + ", itemId = "
-                + itemId);
+        log.debug("+ItemServiceImpl - addComment: comment = {}, ownerId = {}, itemId = {}", commentDto, userId, itemId);
         log.debug("ItemServiceImpl - addComment: " + LocalDateTime.now());
 
         Optional<List<Booking>> booking = bookingRepository
@@ -193,7 +192,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private LastOrNextBooking getBookingToItem(ItemDto item, long ownerId, boolean isLastBooking) {
-        log.debug("+ItemServiceImpl - getBookingToItem: ItemDtoWithBooking = " + item + ", ownerId = " + ownerId);
+        log.debug("+ItemServiceImpl - getBookingToItem: ItemDtoWithBooking = {}, ownerId = {}", item, ownerId);
         List<LastOrNextBooking> bookings = bookingRepository
                 .findByItemIdOrderByStartAsc(item.getId())
                 .stream()

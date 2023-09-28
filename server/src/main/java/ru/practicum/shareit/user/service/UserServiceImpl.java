@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
-        log.debug("+UserServiceImpl - addUser: " + userDto + ". userId = " + userId);
+        log.debug("+UserServiceImpl - addUser: {}. userId = {}", userDto, userId);
 
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ObjectsDbException("Юзера с userId = " + userId + " нет"));
