@@ -18,8 +18,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.validation.Create;
 import ru.practicum.shareit.validation.Update;
 
-import javax.validation.Valid;
-
 @Slf4j
 @Validated
 @Controller
@@ -71,7 +69,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> addComment(@Valid @RequestBody CommentDto comment, @PathVariable long itemId,
+    public ResponseEntity<Object> addComment(@Validated(Create.class) @RequestBody CommentDto comment, @PathVariable long itemId,
                               @RequestHeader(HEADER) long ownerId) {
         log.debug("+ItemController - addComment: comment = {}, ownerId = {}", comment, ownerId);
         ResponseEntity<Object> answer = itemClient.addComment(comment, ownerId, itemId);

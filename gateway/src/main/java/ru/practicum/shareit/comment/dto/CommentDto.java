@@ -3,6 +3,7 @@ package ru.practicum.shareit.comment.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.validation.Create;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
@@ -15,16 +16,16 @@ public class CommentDto {
     private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
 
     long id;
-    @NotBlank
+    @NotBlank(groups = Create.class)
     @Size(min = 1, max = 500)
     String text;
-    @NotNull
+    @NotNull(groups = Create.class)
     Item item;
-    @NotNull
+    @NotNull(groups = Create.class)
     @Size(min = 1, max = 255)
     String authorName;
-    @NotNull
+    @NotNull(groups = Create.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
-    @FutureOrPresent
+    @FutureOrPresent(groups = Create.class)
     LocalDateTime created;
 }

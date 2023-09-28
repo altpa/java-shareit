@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.request.dto.RequestsDto;
+import ru.practicum.shareit.validation.Create;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
 @Slf4j
@@ -28,7 +28,7 @@ public class RequestController {
     private final RequestClient requestClient;
 
     @PostMapping
-    ResponseEntity<Object> addRequest(@Valid @RequestBody RequestsDto requestsDto, @RequestHeader(HEADER) long ownerId) {
+    ResponseEntity<Object> addRequest(@Validated(Create.class) @RequestBody RequestsDto requestsDto, @RequestHeader(HEADER) long ownerId) {
         log.info("+requestController - addRequest: " + requestsDto);
         ResponseEntity<Object> answer =  requestClient.save(requestsDto, ownerId);
         log.info("-requestController - addRequest: " + answer);

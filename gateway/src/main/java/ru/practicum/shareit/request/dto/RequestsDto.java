@@ -3,6 +3,7 @@ package ru.practicum.shareit.request.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.validation.Create;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
@@ -17,12 +18,12 @@ public class RequestsDto {
 
     long id;
 
-    @NotBlank(message = "description may not be blank")
+    @NotBlank(message = "description may not be blank", groups = Create.class)
     @Size(min = 1, max = 500)
     String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
-    @FutureOrPresent
+    @FutureOrPresent(groups = Create.class)
     LocalDateTime created;
 
     private Set<Item> items;
