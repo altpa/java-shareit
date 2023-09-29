@@ -7,7 +7,6 @@ import ru.practicum.shareit.validation.Create;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -19,11 +18,12 @@ public class CommentDto {
     @NotBlank(groups = Create.class)
     @Size(min = 1, max = 500)
     String text;
-    @NotNull(groups = Create.class)
+
     Item item;
-    @NotNull(groups = Create.class)
+
     @Size(min = 1, max = 255)
     String authorName;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
     @FutureOrPresent(groups = Create.class)
     LocalDateTime created;
