@@ -24,7 +24,6 @@ public class CommentDto {
     @NotNull(groups = Create.class)
     @Size(min = 1, max = 255)
     String authorName;
-    @NotNull(groups = Create.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
     @FutureOrPresent(groups = Create.class)
     LocalDateTime created;
