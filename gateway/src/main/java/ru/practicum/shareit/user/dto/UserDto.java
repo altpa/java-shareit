@@ -12,6 +12,7 @@ public class UserDto {
     private long id;
 
     @Size(min = 1, max = 255)
+    @NotBlank(message = "name may not be blank", groups = Create.class)
     private String name;
 
     @NotBlank(message = "email may not be blank", groups = Create.class)

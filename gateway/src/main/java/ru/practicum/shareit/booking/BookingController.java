@@ -22,6 +22,7 @@ import javax.validation.constraints.Min;
 @Slf4j
 @Controller
 @RequestMapping(path = "/bookings")
+@Validated
 public class BookingController {
     private static final String HEADER = "X-Sharer-User-Id";
 
@@ -55,7 +56,6 @@ public class BookingController {
     }
 
     @GetMapping
-    @Validated
     public ResponseEntity<Object> getByUserIdAndStateByBooker(
                                         @RequestHeader(HEADER) long userId,
                                         @RequestParam(defaultValue = "ALL") String state,
@@ -69,7 +69,6 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    @Validated
     public ResponseEntity<Object> getByUserIdAndStateByOwner(@RequestHeader(HEADER) long userId,
                                         @RequestParam(defaultValue = "ALL") String state,
                                         @RequestParam(name = "from", defaultValue = "0") @Min(0) int from,

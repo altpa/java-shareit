@@ -2,7 +2,6 @@ package ru.practicum.shareit.comment.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.validation.Create;
 
 import javax.validation.constraints.FutureOrPresent;
@@ -18,8 +17,6 @@ public class CommentDto {
     @NotBlank(groups = Create.class)
     @Size(min = 1, max = 500)
     String text;
-
-    Item item;
 
     @Size(min = 1, max = 255)
     String authorName;
