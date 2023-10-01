@@ -6,14 +6,15 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.validation.Create;
-import ru.practicum.shareit.validation.StartBeforeEndDateValid;
+import ru.practicum.shareit.validation.StartBeforeOrEqualEndDateValid;
 
+import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
-@StartBeforeEndDateValid
+@StartBeforeOrEqualEndDateValid(groups = Create.class)
 public class BookingDto {
     private long id;
 
@@ -25,7 +26,7 @@ public class BookingDto {
     private LocalDateTime start;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN)
-    @FutureOrPresent(groups = Create.class)
+    @Future(groups = Create.class)
     @NotNull(groups = Create.class)
     private LocalDateTime end;
 

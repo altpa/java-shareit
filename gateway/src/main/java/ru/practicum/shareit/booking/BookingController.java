@@ -28,7 +28,8 @@ public class BookingController {
     private final BookingClient bookingClient;
 
     @PostMapping
-    public ResponseEntity<Object> addBooking(@Validated(Create.class) @RequestBody BookingDto bookingDto, @RequestHeader(HEADER) long userId) {
+    public ResponseEntity<Object> addBooking(@RequestBody @Validated(Create.class) BookingDto bookingDto,
+                                             @RequestHeader(HEADER) long userId) {
         log.debug("+BookingController - addBooking: bookingDto = {}, userId = {}", bookingDto, userId);
         ResponseEntity<Object>  answer =  bookingClient.addBooking(bookingDto, userId);
         log.debug("-BookingController - addBooking: answer = {}", answer);

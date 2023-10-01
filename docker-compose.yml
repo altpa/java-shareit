@@ -11,9 +11,10 @@ services:
       - server
     environment:
       - SHAREIT_SERVER_URL=http://server:9090
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      - TZ=Europe/Moscow
+#    volumes:
+#      - /etc/timezone:/etc/timezone:ro
+#      - /etc/localtime:/etc/localtime:ro
 
   server:
     build: server
@@ -28,9 +29,10 @@ services:
       - SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver
       - SPRING_DATASOURCE_USERNAME=test
       - SPRING_DATASOURCE_PASSWORD=test
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      - TZ=Europe/Moscow
+#    volumes:
+#      - /etc/timezone:/etc/timezone:ro
+#      - /etc/localtime:/etc/localtime:ro
 
 
   shareit_db:
@@ -40,8 +42,9 @@ services:
       - POSTGRES_DB=shareit_db
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      - TZ=Europe/Moscow
+#    volumes:
+#      - /etc/timezone:/etc/timezone:ro
+#      - /etc/localtime:/etc/localtime:ro
     ports:
       - "6541:5432"
