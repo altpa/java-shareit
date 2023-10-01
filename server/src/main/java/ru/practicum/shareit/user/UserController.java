@@ -26,23 +26,23 @@ public class UserController {
     public List<UserDto> getAllUsers() {
         log.debug("+UserController - getAllUsers");
         List<UserDto> users =  userService.getAllUsers();
-        log.debug("-UserController - getAllUsers: " + users);
+        log.debug("-UserController - getAllUsers: {}", users);
         return users;
     }
 
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable int userId) {
-        log.debug("+UserController - getUserById: userId = " + userId);
+        log.debug("+UserController - getUserById: userId = {}", userId);
         UserDto user = userService.getUserById(userId);
-        log.debug("-UserController - getUserById: " + user);
+        log.debug("-UserController - getUserById: {}", user);
         return user;
     }
 
     @PostMapping
     public UserDto addUser(@RequestBody UserDto userDto) {
-        log.debug("+UserController - addUser: " + userDto);
+        log.debug("+UserController - addUser: {}", userDto);
         UserDto user = userService.addUser(userDto);
-        log.debug("-UserController - addUser: " + user);
+        log.debug("-UserController - addUser: {}", user);
         return user;
     }
 
@@ -50,15 +50,15 @@ public class UserController {
     public UserDto updateUser(@RequestBody UserDto userDto, @PathVariable int userId) {
         log.debug("+UserController - updateUser:  {}, userId = {}", userDto, userId);
         UserDto user = userService.updateUser(userDto, userId);
-        log.debug("-UserController - updateUser: " + user);
+        log.debug("-UserController - updateUser: {}", user);
         return user;
     }
 
     @DeleteMapping("/{userId}")
     public UserDto deleteUser(@PathVariable int userId) {
-        log.debug("+UserController - deleteUser: userId = " + userId);
+        log.debug("+UserController - deleteUser: userId = {}", userId);
         UserDto user = userService.deleteUser(userId);
-        log.debug("-UserController - deleteUser: " + user);
+        log.debug("-UserController - deleteUser: {}", user);
         return user;
     }
 }

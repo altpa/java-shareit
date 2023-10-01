@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking;
 
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,7 +18,7 @@ import ru.practicum.shareit.validation.Create;
 
 import javax.validation.constraints.Min;
 
-@Data
+@RequiredArgsConstructor
 @Slf4j
 @Controller
 @RequestMapping(path = "/bookings")
@@ -31,7 +31,7 @@ public class BookingController {
     public ResponseEntity<Object> addBooking(@Validated(Create.class) @RequestBody BookingDto bookingDto, @RequestHeader(HEADER) long userId) {
         log.debug("+BookingController - addBooking: bookingDto = {}, userId = {}", bookingDto, userId);
         ResponseEntity<Object>  answer =  bookingClient.addBooking(bookingDto, userId);
-        log.debug("-BookingController - addBooking: answer = " + answer);
+        log.debug("-BookingController - addBooking: answer = {}", answer);
         return answer;
     }
 
@@ -41,7 +41,7 @@ public class BookingController {
         log.debug("+BookingController - changeStatus: bookingId = {}, approved = {}, userId = {}",
                 bookingId, approved, userId);
         ResponseEntity<Object>  answer = bookingClient.changeStatus(bookingId, approved, userId);
-        log.debug("+BookingController - changeStatus: answer = " + answer);
+        log.debug("+BookingController - changeStatus: answer = {}", answer);
         return answer;
     }
 
@@ -49,11 +49,12 @@ public class BookingController {
     public ResponseEntity<Object> getById(@PathVariable long bookingId, @RequestHeader(HEADER) long userId) {
         log.debug("+BookingController - getById: bookingId = {}, userId = {}", bookingId, userId);
         ResponseEntity<Object>  answer = bookingClient.getById(bookingId, userId);
-        log.debug("+BookingController - getById: answer = " + answer);
+        log.debug("+BookingController - getById: answer = {}", answer);
         return answer;
     }
 
     @GetMapping
+    @Validated
     public ResponseEntity<Object> getByUserIdAndStateByBooker(
                                         @RequestHeader(HEADER) long userId,
                                         @RequestParam(defaultValue = "ALL") String state,
@@ -62,18 +63,19 @@ public class BookingController {
         log.info("+BookingController - getByUserIdAndState: userId = {}, state = {}", userId, state);
         ResponseEntity<Object>  answer = bookingClient.getByUserIdAndStateByBooker(userId, state, from, size);
 
-        log.info("+BookingController - getByUserIdAndState: answer = " + answer);
+        log.info("+BookingController - getByUserIdAndState: answer = {}", answer);
         return answer;
     }
 
     @GetMapping("/owner")
+    @Validated
     public ResponseEntity<Object> getByUserIdAndStateByOwner(@RequestHeader(HEADER) long userId,
                                         @RequestParam(defaultValue = "ALL") String state,
                                         @RequestParam(name = "from", defaultValue = "0") @Min(0) int from,
                                         @RequestParam(name = "size", defaultValue = "10") @Min(1) int size) {
         log.debug("+BookingController - getByOwnerId: userId = {}, state = {}", userId, state);
         ResponseEntity<Object>  answer = bookingClient.getByUserIdAndStateByOwner(userId, state, from, size);
-        log.debug("+BookingController - getByOwnerId: answer = " + answer);
+        log.debug("+BookingController - getByOwnerId: answer = {}", answer);
         return answer;
     }
 }

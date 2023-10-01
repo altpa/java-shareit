@@ -6,12 +6,14 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.validation.Create;
+import ru.practicum.shareit.validation.StartBeforeEndDateValid;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
+@StartBeforeEndDateValid
 public class BookingDto {
     private long id;
 

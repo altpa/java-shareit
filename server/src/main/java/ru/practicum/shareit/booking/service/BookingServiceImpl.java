@@ -37,11 +37,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto addBooking(BookingDto bookingDto, long userId) {
         log.debug("+BookingServiceImpl - addBooking: {}, userId = {}", bookingDto, userId);
-        if (bookingDto.getStart().isAfter(bookingDto.getEnd()) || bookingDto.getStart().equals(bookingDto.getEnd())) {
-            throw new BadRequestException("start = " + bookingDto.getStart() + " after or equals end = "
-                    + bookingDto.getEnd());
-        }
-
         Long itemId = bookingDto.getItemId();
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ObjectNotFoundException("itemId = " + itemId + " not found"));
@@ -61,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
 
         bookingDto.setStatus(WAITING);
         BookingDto answer = mapper.bookingToBookingDto(bookingRepository.save(mapper.bookingDtoToBooking(bookingDto)));
-        log.debug("-BookingServiceImpl - addBooking: " + answer);
+        log.debug("-BookingServiceImpl - addBooking: {}", answer);
         return answer;
     }
 
@@ -88,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         BookingDto answer = mapper.bookingToBookingDto(bookingRepository.save(booking));
-        log.debug("-BookingServiceImpl - changeStatus: " + answer);
+        log.debug("-BookingServiceImpl - changeStatus: {}", answer);
         return answer;
     }
 
@@ -106,7 +101,7 @@ public class BookingServiceImpl implements BookingService {
         long bookerId = booking.getBooker().getId();
 
         if (ownerId == userId || bookerId == userId) {
-            log.debug("-BookingServiceImpl - getById: " + booking);
+            log.debug("-BookingServiceImpl - getById: {}", booking);
             return booking;
         } else {
             throw new ObjectNotFoundException("userId = " + userId + ", ownerId = " + ownerId + ", bookerId = "
@@ -119,7 +114,7 @@ public class BookingServiceImpl implements BookingService {
         log.info("+BookingServiceImpl - getByUserIdAndStateByBooker: userId = {}, state = {}, from = {}, size = {}", userId, state, from, size);
         boolean isBooker = true;
         List<BookingDto> answer = getByUserIdAndState(userId, state, isBooker, from, size);
-        log.info("-BookingServiceImpl - getByUserIdAndStateByBooker: " + answer);
+        log.info("-BookingServiceImpl - getByUserIdAndStateByBooker: {}", answer);
         return answer;
     }
 

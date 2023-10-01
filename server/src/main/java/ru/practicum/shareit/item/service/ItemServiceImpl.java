@@ -50,13 +50,13 @@ public class ItemServiceImpl implements ItemService {
         itemDto.setOwner(userRepository.findById(ownerId)
                 .orElseThrow(() ->  new ObjectNotFoundException("ownerId не найден")));
         ItemDto item = itemMapper.itemToItemDto(itemRepository.save(itemMapper.itemDtoToItem(itemDto)));
-        log.debug("-ItemServiceImpl - addItem: " + item);
+        log.debug("-ItemServiceImpl - addItem: {}", item);
         return item;
    }
 
     @Override
     public List<ItemDto> getAllItemsByOwnerId(long ownerId) {
-        log.debug("+ItemServiceImpl - getAllItemsByOwnerId: ownerId = " + ownerId);
+        log.debug("+ItemServiceImpl - getAllItemsByOwnerId: ownerId = {}", ownerId);
         List<ItemDto> allItemsByOwnerId = itemRepository.findByOwnerIdOrderByIdAsc(ownerId, PageRequest.of(FROM, SIZE))
                 .stream()
                 .map(itemMapper::itemToItemDto)
@@ -66,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
         allItemsByOwnerId.forEach(i -> {
             itemsDto.add(setCommentsAndBooking(i, ownerId));
         });
-        log.debug("-ItemServiceImpl - getAllItemsByOwnerId: " + itemsDto);
+        log.debug("-ItemServiceImpl - getAllItemsByOwnerId: {}", itemsDto);
         return itemsDto;
     }
 
@@ -95,22 +95,22 @@ public class ItemServiceImpl implements ItemService {
 
         updatedItem = itemMapper.itemToItemDto(itemRepository.save(itemMapper.itemDtoToItem(updatedItem)));
 
-        log.debug("-ItemServiceImpl - updateItem: " + updatedItem);
+        log.debug("-ItemServiceImpl - updateItem: {}", updatedItem);
         return updatedItem;
     }
 
     @Override
     public ItemDto getItemById(long itemId, long ownerId) {
-        log.debug("+ItemServiceImpl - getItemById: itemId = " + itemId);
+        log.debug("+ItemServiceImpl - getItemById: itemId = {}", itemId);
         ItemDto item = itemMapper.itemToItemDto(itemRepository.findById(itemId).orElseThrow(
                 () -> new ObjectNotFoundException("itemId = " + itemId + " not found")));
-        log.debug("-ItemServiceImpl - getItemById: " + item);
+        log.debug("-ItemServiceImpl - getItemById: {}", item);
         return setCommentsAndBooking(item, ownerId);
     }
 
     @Override
     public List<ItemDto> searchItems(String searchText) {
-        log.debug("+ItemServiceImpl - searchItems: searchText = " + searchText);
+        log.debug("+ItemServiceImpl - searchItems: searchText = {}", searchText);
         if (!searchText.isEmpty()) {
             List<ItemDto> items = itemRepository
                     .findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(searchText,
@@ -118,7 +118,7 @@ public class ItemServiceImpl implements ItemService {
                     .stream()
                     .map(itemMapper::itemToItemDto)
                     .collect(toList());
-            log.debug("-ItemServiceImpl - searchItems: " + items);
+            log.debug("-ItemServiceImpl - searchItems: {}", items);
             return items;
         } else {
             log.debug("-ItemServiceImpl - searchItems: not found");
@@ -129,7 +129,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentDto addComment(CommentDto commentDto, long userId, long itemId) {
         log.debug("+ItemServiceImpl - addComment: comment = {}, ownerId = {}, itemId = {}", commentDto, userId, itemId);
-        log.debug("ItemServiceImpl - addComment: " + LocalDateTime.now());
+        log.debug("ItemServiceImpl - addComment: {}", LocalDateTime.now());
 
         Optional<List<Booking>> booking = bookingRepository
                 .findByItemIdAndBookerIdAndStatusAndEndBefore(itemId, userId, APPROVED,
@@ -139,7 +139,7 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("userId = " + userId + " not booked itemId = "
                     + itemId);
         }
-        log.debug("ItemServiceImpl - addComment: booking = " + booking);
+        log.debug("ItemServiceImpl - addComment: booking = {}", booking);
 
         Comment comment = commentMapper.commentDtoToComment(commentDto);
 
@@ -152,14 +152,14 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() ->  new ObjectNotFoundException("userId = " + userId + " not found"));
         comment.setAuthorName(author.getName());
 
-        log.debug("ItemServiceImpl - addComment: comment = " + comment);
+        log.debug("ItemServiceImpl - addComment: comment = {}", comment);
         CommentDto answer = commentMapper.commentToCommentDto(commentRepository.save(comment));
-        log.debug("-ItemServiceImpl - addComment: answer = " + answer);
+        log.debug("-ItemServiceImpl - addComment: answer = {}", answer);
         return answer;
     }
 
     private List<Comment> getCommentsToItem(ItemDto item) {
-        log.debug("+ItemServiceImpl - setCommentsToItem: ItemDtoWithBooking = " + item);
+        log.debug("+ItemServiceImpl - setCommentsToItem: ItemDtoWithBooking = {}", item);
         List<Comment> comments = Collections.emptyList();
         try {
             comments = commentRepository.findByItemId(item.getId())
@@ -169,7 +169,7 @@ public class ItemServiceImpl implements ItemService {
             log.debug("ItemServiceImpl - setCommentsToItem: no comments");
             throw new ObjectNotFoundException("itemId = " + item.getId() + " no comments");
         }
-        log.debug("ItemServiceImpl - setCommentsToItem: comments = " + comments);
+        log.debug("ItemServiceImpl - setCommentsToItem: comments = {}", comments);
         return comments;
     }
 
@@ -199,8 +199,7 @@ public class ItemServiceImpl implements ItemService {
                 .filter(b -> b.getStatus().equals(APPROVED))
                 .collect(Collectors.toList());
 
-        log.debug("ItemServiceImpl - getBookingToItem: bookings = " + bookings
-                + ", LocalDateTime.now() = " + LocalDateTime.now());
+        log.debug("ItemServiceImpl - getBookingToItem: bookings = {}, LocalDateTime.now() = {}", bookings, LocalDateTime.now());
         LastOrNextBooking answer = null;
         if (item.getOwner().getId() == ownerId && !bookings.isEmpty()) {
             LocalDateTime now = LocalDateTime.now();
@@ -220,7 +219,7 @@ public class ItemServiceImpl implements ItemService {
                 answer = bookings.get(nextBookingIndex);
             }
         }
-        log.debug("-ItemServiceImpl - getBookingToItem: ItemDtoWithBooking = " + item);
+        log.debug("-ItemServiceImpl - getBookingToItem: ItemDtoWithBooking = {}", item);
         return answer;
     }
 }

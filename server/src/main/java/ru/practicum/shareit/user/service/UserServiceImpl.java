@@ -25,9 +25,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        log.debug("+UserServiceImpl - addUser: " + userDto);
+        log.debug("+UserServiceImpl - addUser: {}", userDto);
         UserDto user = mapper.userToUserDto(userRepository.save(mapper.userDtoToUser(userDto)));
-        log.debug("-UserServiceImpl - addUser: " + user);
+        log.debug("-UserServiceImpl - addUser: {}", user);
         return user;
     }
 
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         List<UserDto> users = StreamSupport.stream(userRepository.findAll().spliterator(), false)
                 .map(mapper::userToUserDto)
                 .collect(toList());
-        log.debug("-UserServiceImpl - getAllUsers: " + users);
+        log.debug("-UserServiceImpl - getAllUsers: {}", users);
         return users;
     }
 
@@ -54,24 +54,24 @@ public class UserServiceImpl implements UserService {
 
         user = userRepository.save(user);
 
-        log.debug("-UserServiceImpl - addUser: " + user);
+        log.debug("-UserServiceImpl - addUser: {}", user);
         return mapper.userToUserDto(user);
     }
 
     @Override
     public UserDto getUserById(long userId) {
-        log.debug("+UserServiceImpl - getUserById: userId = " + userId);
+        log.debug("+UserServiceImpl - getUserById: userId = {}", userId);
         UserDto user = mapper.userToUserDto(userRepository.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Юзера с userId = " + userId + " нет")));
-        log.debug("-UserServiceImpl - getUserById: " + user);
+        log.debug("-UserServiceImpl - getUserById: {}", user);
         return user;
     }
 
     @Override
     public UserDto deleteUser(long userId) {
-        log.debug("+UserServiceImpl - deleteUser: userId = " + userId);
+        log.debug("+UserServiceImpl - deleteUser: userId = {}", userId);
         UserDto user = mapper.userToUserDto(userRepository.deleteById(userId));
-        log.debug("-UserServiceImpl - deleteUser: " + user);
+        log.debug("-UserServiceImpl - deleteUser: {}", user);
         return user;
     }
 }

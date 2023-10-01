@@ -33,7 +33,7 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> changeStatus(long bookingId, Boolean approved, long userId) {
-        log.info("changeStatus:" + bookingId + "approved:" + approved + "userId:" + userId);
+        log.info("changeStatus: {}, approved: {}, userId: {}", bookingId, approved, userId);
         Map<String, Object> parameters = Map.of(
                 "approved", approved.toString()
         );

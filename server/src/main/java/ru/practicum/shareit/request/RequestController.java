@@ -26,17 +26,17 @@ public class RequestController {
 
     @PostMapping
     RequestsDto addRequest(@RequestBody RequestsDto requestsDto, @RequestHeader(HEADER) long ownerId) {
-        log.info("+requestController - addRequest: " + requestsDto);
+        log.info("+requestController - addRequest: {}", requestsDto);
         RequestsDto answer =  requestService.save(requestsDto, ownerId);
-        log.info("-requestController - addRequest: " + answer);
+        log.info("-requestController - addRequest: {}", answer);
         return answer;
     }
 
     @GetMapping
     List<RequestsDto> getOwnRequests(@RequestHeader(HEADER) long ownerId) {
-        log.info("+requestController - getOwnRequests: ownerId = " + ownerId);
+        log.info("+requestController - getOwnRequests: ownerId = {}", ownerId);
         List<RequestsDto> answer = requestService.getOwnRequests(ownerId);
-        log.info("-requestController - getOwnRequests: " + answer);
+        log.info("-requestController - getOwnRequests: {}", answer);
         return answer;
     }
 
@@ -46,15 +46,15 @@ public class RequestController {
                                     @RequestHeader(HEADER) long userId) {
         log.info("+requestController - getAllRequest: from = {}, size = {}", from, size);
         List<RequestsDto> answer = requestService.getAllRequest(from, size, userId);
-        log.info("-requestController - getAllRequest: " + answer);
+        log.info("-requestController - getAllRequest: {}", answer);
         return answer;
     }
 
     @GetMapping("/{requestId}")
     RequestsDto getRequestById(@PathVariable long requestId, @RequestHeader(HEADER) long userId) {
-        log.info("+requestController - getRequestById: requestId = " + requestId);
+        log.info("+requestController - getRequestById: requestId = {}", requestId);
         RequestsDto answer = requestService.getRequestById(requestId, userId);
-        log.info("-requestController - getRequestById: " + answer);
+        log.info("-requestController - getRequestById: {}", answer);
         return answer;
     }
 }

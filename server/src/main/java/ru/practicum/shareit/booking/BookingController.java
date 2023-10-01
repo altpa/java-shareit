@@ -29,7 +29,7 @@ public class BookingController {
     public BookingDto addBooking(@RequestBody BookingDto bookingDto, @RequestHeader(HEADER) long userId) {
         log.debug("+BookingController - addBooking: bookingDto = {}, userId = {}", bookingDto, userId);
         BookingDto answer =  bookingService.addBooking(bookingDto, userId);
-        log.debug("-BookingController - addBooking: answer = " + answer);
+        log.debug("-BookingController - addBooking: answer = {}", answer);
         return answer;
     }
 
@@ -39,7 +39,7 @@ public class BookingController {
         log.debug("+BookingController - changeStatus: bookingId = {}, approved = {}, userId = {}",
                 bookingId, approved, userId);
         BookingDto answer = bookingService.changeStatus(bookingId, approved, userId);
-        log.debug("+BookingController - changeStatus: answer = " + answer);
+        log.debug("+BookingController - changeStatus: answer = {}", answer);
         return answer;
     }
 
@@ -47,7 +47,7 @@ public class BookingController {
     public BookingDto getById(@PathVariable long bookingId, @RequestHeader(HEADER) long userId) {
         log.debug("+BookingController - getById: bookingId = {}, userId = {}", bookingId, userId);
         BookingDto answer = bookingService.getById(bookingId, userId);
-        log.debug("+BookingController - getById: answer = " + answer);
+        log.debug("+BookingController - getById: answer = {}", answer);
         return answer;
     }
 
@@ -60,7 +60,7 @@ public class BookingController {
         log.debug("+BookingController - getByUserIdAndState: userId = {}, state = {}", userId, state);
         List<BookingDto> answer = bookingService.getByUserIdAndStateByBooker(userId, state, from, size);
 
-        log.info("+BookingController - getByUserIdAndState: answer = " + answer);
+        log.info("+BookingController - getByUserIdAndState: answer = {}", answer);
         return answer;
     }
 
@@ -71,7 +71,7 @@ public class BookingController {
                                         @RequestParam(name = "size", defaultValue = "10") int size) {
         log.debug("+BookingController - getByOwnerId: userId = {}, state = {}", userId, state);
         List<BookingDto> answer = bookingService.getByUserIdAndStateByOwner(userId, state, from, size);
-        log.debug("+BookingController - getByOwnerId: answer = " + answer);
+        log.debug("+BookingController - getByOwnerId: answer = {}", answer);
         return answer;
     }
 }

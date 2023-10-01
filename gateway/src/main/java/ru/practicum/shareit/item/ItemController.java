@@ -31,7 +31,7 @@ public class ItemController {
     public ResponseEntity<Object> addItem(@Validated(Create.class) @RequestBody ItemDto itemDto, @RequestHeader(HEADER) long ownerId) {
         log.debug("+ItemController - addItem: {}. ownerId = {}", itemDto, ownerId);
         ResponseEntity<Object> item = itemClient.addItem(itemDto, ownerId);
-        log.debug("-ItemController - addItem: " + item);
+        log.debug("-ItemController - addItem: {}", item);
         return item;
     }
 
@@ -39,7 +39,7 @@ public class ItemController {
     public ResponseEntity<Object> getAllItemsByOwnerId(@RequestHeader(HEADER) long ownerId) {
         log.debug("+ItemController - getAllItemsByOwnerId: ownerId = " + ownerId);
         ResponseEntity<Object> allItemsByOwnerId = itemClient.getAllItemsByOwnerId(ownerId);
-        log.debug("-ItemController - getAllItemsByOwnerId: " + allItemsByOwnerId);
+        log.debug("-ItemController - getAllItemsByOwnerId: {}", allItemsByOwnerId);
         return allItemsByOwnerId;
     }
 
@@ -48,7 +48,7 @@ public class ItemController {
                                     @RequestHeader(HEADER) long ownerId, @PathVariable long itemId) {
         log.debug("+ItemController - updateItem: {}. ownerId = {}. itemId = {}", itemDto, ownerId, itemId);
         ResponseEntity<Object> item = itemClient.updateItem(itemDto, ownerId, itemId);
-        log.debug("-ItemController - updateItem: " + item);
+        log.debug("-ItemController - updateItem: {}", item);
         return item;
     }
 
@@ -56,7 +56,7 @@ public class ItemController {
     public ResponseEntity<Object> getItemById(@PathVariable long itemId, @RequestHeader(HEADER) long ownerId) {
         log.debug("+ItemController - getItemById: itemId = " + itemId);
         ResponseEntity<Object> item = itemClient.getItemById(itemId, ownerId);
-        log.debug("-ItemController - getItemById: " + item);
+        log.debug("-ItemController - getItemById: {}", item);
         return item;
     }
 
@@ -64,7 +64,7 @@ public class ItemController {
     public ResponseEntity<Object> searchItems(@RequestParam("text") String searchText) {
         log.debug("+ItemController - searchItems: searchText = " + searchText);
         ResponseEntity<Object> items = itemClient.searchItems(searchText);
-        log.debug("-ItemController - searchItems: " + items);
+        log.debug("-ItemController - searchItems: {}", items);
         return items;
     }
 
@@ -73,7 +73,7 @@ public class ItemController {
                               @RequestHeader(HEADER) long ownerId) {
         log.debug("+ItemController - addComment: comment = {}, ownerId = {}", comment, ownerId);
         ResponseEntity<Object> answer = itemClient.addComment(comment, ownerId, itemId);
-        log.debug("-ItemController - addComment: " + answer);
+        log.debug("-ItemController - addComment: {}", answer);
         return answer;
     }
 }

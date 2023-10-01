@@ -28,23 +28,23 @@ public class UserController {
     public ResponseEntity<Object> getAllUsers() {
         log.debug("+UserController - getAllUsers");
         ResponseEntity<Object> users =  userClient.getAllUsers();
-        log.debug("-UserController - getAllUsers: " + users);
+        log.debug("-UserController - getAllUsers: {}", users);
         return users;
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<Object> getUserById(@PathVariable int userId) {
-        log.debug("+UserController - getUserById: userId = " + userId);
+        log.debug("+UserController - getUserById: userId = {}", userId);
         ResponseEntity<Object>  user = userClient.getUserById(userId);
-        log.debug("-UserController - getUserById: " + user);
+        log.debug("-UserController - getUserById: {}", user);
         return user;
     }
 
     @PostMapping
     public ResponseEntity<Object> addUser(@Validated(Create.class) @RequestBody UserDto userDto) {
-        log.debug("+UserController - addUser: " + userDto);
+        log.debug("+UserController - addUser: {}", userDto);
         ResponseEntity<Object>  user = userClient.addUser(userDto);
-        log.debug("-UserController - addUser: " + user);
+        log.debug("-UserController - addUser: {}", user);
         return user;
     }
 
@@ -52,15 +52,15 @@ public class UserController {
     public ResponseEntity<Object> updateUser(@Validated(Update.class) @RequestBody UserDto userDto, @PathVariable int userId) {
         log.debug("+UserController - updateUser:  {}, userId = {}", userDto, userId);
         ResponseEntity<Object>  user = userClient.updateUser(userDto, userId);
-        log.debug("-UserController - updateUser: " + user);
+        log.debug("-UserController - updateUser: {}", user);
         return user;
     }
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<Object> deleteUser(@PathVariable int userId) {
-        log.debug("+UserController - deleteUser: userId = " + userId);
+        log.debug("+UserController - deleteUser: userId = {}", userId);
         ResponseEntity<Object>  user = userClient.deleteUser(userId);
-        log.debug("-UserController - deleteUser: " + user);
+        log.debug("-UserController - deleteUser: {}", user);
         return user;
     }
 }
